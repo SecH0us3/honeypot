@@ -10,9 +10,11 @@ A sophisticated honeypot application built for Cloudflare Workers that deceives 
 - **Database Files**: Fake SQL dumps and database files
 - **Backup Files**: Realistic backup files with metadata
 - **Environment Files**: Fake configuration files (.env, .ini, .conf)
+- **POST Request Honeypot**: Returns random HTTP errors (400-561) for all POST requests
 - **Dynamic Content**: Responses vary slightly each time to avoid detection
 - **Realistic Headers**: Proper Content-Type and server headers
 - **Company Branding**: Uses COMPANY_NAME environment variable when available
+- **Webhook Notifications**: Optional webhook alerts for honeypot triggers
 
 ## Architecture
 
@@ -109,6 +111,12 @@ export class MyGenerator extends BaseTemplateGenerator {
 
 The honeypot currently detects and responds to:
 
+### POST Requests
+- **All POST requests** to any endpoint return random HTTP error codes (400-561)
+- Includes realistic error messages and proper content-type handling
+- Supports JSON, XML, and HTML error responses based on request headers
+- Logs all POST attempts with client information
+
 ### Git Repository Files
 - `.git/config`
 - `.git/HEAD`
@@ -151,9 +159,11 @@ The honeypot currently detects and responds to:
 
 The honeypot logs all triggered requests with:
 - Requested path
+- HTTP method (GET/POST)
 - Client IP address
 - User agent
 - Matched rule description
+- For POST requests: error status code and message
 
 Access logs through Cloudflare Workers dashboard or CLI:
 
@@ -209,28 +219,54 @@ export const RANDOM_DATA = {
 
 ## Testing
 
+### Full Test Suite
+
 A comprehensive test script is included to verify honeypot functionality:
 
 ```bash
 # Make sure your worker is running locally
 npm run dev
 
-# In another terminal, run the test script
+# In another terminal, run the full test script
 node test_honeypot.js
 ```
 
 The test script will:
-- Test all configured honeypot patterns
+- Test all configured GET honeypot patterns
+- Test POST requests to various endpoints
+- Verify random error generation for POST requests
 - Verify response formats and headers
 - Check that legitimate paths return 404
 - Measure response times
 - Provide detailed success/failure reports
 
+### POST-Only Testing
+
+For quick POST request testing:
+
+```bash
+# Test only POST endpoints
+node test_post.js
+```
+
+The POST test script will:
+- Send POST requests with various content types (JSON, form data, XML)
+- Verify random error status codes (400-561)
+- Test different payload types including potential attack vectors
+- Display response time statistics
+- Show status code distribution
+
 ### Test Results Interpretation
 
+**GET Requests:**
 - **Green ✓**: Honeypot triggered correctly (200 status)
 - **Yellow -**: Legitimate 404 response
 - **Red ✗**: Error or unexpected response
+
+**POST Requests:**
+- **Red ✓**: Random error generated correctly (400-561 status)
+- **Yellow ⚠**: Unexpected response (not in 400-561 range)
+- **Red ✗**: Request failed completely
 
 ### Testing Against Production
 
@@ -253,6 +289,19 @@ const testUrls = [
 ];
 ```
 
+Add custom POST test cases to `test_post.js`:
+
+```javascript
+const postTests = [
+    {
+        url: '/your-api-endpoint',
+        data: { custom: 'payload' },
+        contentType: 'application/json'
+    },
+    // ... existing tests
+];
+```
+
 ## Monitoring
 
 ### Real-time Logs
@@ -266,18 +315,30 @@ wrangler tail
 ### Log Analysis
 
 Look for entries like:
+
+**GET Requests:**
 ```
 Honeypot triggered: /.git/config from 192.168.1.100 - Git configuration file
 User Agent: Mozilla/5.0 (compatible; Baiduspider/2.0)
 ```
 
+**POST Requests:**
+```
+POST request honeypot triggered: https://yoursite.com/api/login from 203.0.113.100
+User Agent: curl/7.68.0
+Returning error 429: Rate limit exceeded
+```
+
 ### Metrics
 
 Track honeypot effectiveness:
-- Number of triggers per day
-- Most common attack vectors
+- Number of GET honeypot triggers per day
+- Number of POST requests with random errors
+- Most common attack vectors and endpoints
+- Error status code distribution for POST requests
 - Geographic distribution of attackers
 - User agent patterns
+- Response time patterns
 
 ## License
 

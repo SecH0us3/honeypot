@@ -7,7 +7,16 @@
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest",
-		"cf-typegen": "wrangler types"
+		"cf-typegen": "wrangler types",
+		"test:honeypot": "node test_honeypot.js",
+		"test:post": "node test_post.js",
+		"test:full": "npm run test:honeypot && npm run test:post",
+		"logs": "wrangler tail",
+		"logs:pretty": "wrangler tail --format pretty",
+		"logs:json": "wrangler tail --format json",
+		"webhook": "node webhook-example.js",
+		"deploy:staging": "wrangler deploy --env staging",
+		"deploy:production": "wrangler deploy --env production"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.8.19",

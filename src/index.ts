@@ -27,6 +27,12 @@ export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname;
+		const method = request.method;
+
+		// Handle POST requests with random errors
+		if (method === 'POST') {
+			return await generateRandomErrorResponse(request, env);
+		}
 
 		// Check if the request matches any honeypot patterns
 		const matchedRule = findMatchingRule(path);
@@ -271,4 +277,143 @@ function generateRequestId(): string {
 		result += chars[Math.floor(Math.random() * chars.length)];
 	}
 	return result;
+}
+
+/**
+ * Generate random error response for POST requests
+ */
+async function generateRandomErrorResponse(request: Request, env?: any): Promise<Response> {
+	// Generate random HTTP error status between 400 and 561
+	const errorStatus = Math.floor(Math.random() * (561 - 400 + 1)) + 400;
+
+	// Array of random error messages
+	const errorMessages = [
+		'Invalid request format',
+		'Authentication failed',
+		'Access denied',
+		'Resource not found',
+		'Server temporarily unavailable',
+		'Bad request parameters',
+		'Validation error occurred',
+		'Internal processing error',
+		'Service unavailable',
+		'Request timeout',
+		'Insufficient permissions',
+		'Database connection failed',
+		'Configuration error',
+		'Network error',
+		'File not found',
+		'Method not allowed',
+		'Content type not supported',
+		'Rate limit exceeded',
+		'Token expired',
+		'Session invalid',
+		'Malformed request body',
+		'Required field missing',
+		'Invalid JSON format',
+		'Protocol error',
+		'Gateway timeout',
+		'Service overloaded',
+		'Maintenance mode active',
+		'Feature not implemented',
+		'Version not supported',
+		'Domain not authorized',
+	];
+
+	// Pick random error message
+	const randomMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+
+	// Log the POST request attempt
+	const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'unknown';
+	const userAgent = request.headers.get('User-Agent') || 'unknown';
+	const timestamp = new Date().toISOString();
+
+	console.log(`POST request honeypot triggered: ${request.url} from ${clientIp}`);
+	console.log(`User Agent: ${userAgent}`);
+	console.log(`Timestamp: ${timestamp}`);
+	console.log(`Returning error ${errorStatus}: ${randomMessage}`);
+
+	// Send webhook notification if configured
+	if (env?.WEBHOOK_URL) {
+		try {
+			await sendWebhookNotification(env.WEBHOOK_URL, {
+				path: new URL(request.url).pathname,
+				clientIp,
+				userAgent,
+				timestamp,
+				description: `POST request with random error ${errorStatus}`,
+				country: request.headers.get('CF-IPCountry') || 'unknown',
+				method: 'POST',
+				errorStatus,
+				errorMessage: randomMessage,
+			});
+		} catch (error) {
+			console.error('Webhook notification failed:', error);
+		}
+	}
+
+	// Choose response format based on content type or Accept header
+	const acceptHeader = request.headers.get('Accept') || '';
+	const contentType = request.headers.get('Content-Type') || '';
+
+	let responseBody: string;
+	let responseContentType: string;
+
+	if (acceptHeader.includes('application/json') || contentType.includes('application/json')) {
+		// JSON error response
+		responseBody = JSON.stringify({
+			error: randomMessage,
+			status: errorStatus,
+			timestamp: timestamp,
+			path: new URL(request.url).pathname,
+		});
+		responseContentType = 'application/json';
+	} else if (acceptHeader.includes('text/xml') || acceptHeader.includes('application/xml')) {
+		// XML error response
+		responseBody = `<?xml version="1.0" encoding="UTF-8"?>
+<error>
+	<message>${randomMessage}</message>
+	<status>${errorStatus}</status>
+	<timestamp>${timestamp}</timestamp>
+</error>`;
+		responseContentType = 'application/xml';
+	} else {
+		// HTML error response
+		responseBody = `<!DOCTYPE html>
+<html>
+<head>
+	<title>Error ${errorStatus}</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+		.error-container { background: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+		h1 { color: #d32f2f; margin-bottom: 20px; }
+		.error-code { color: #666; font-size: 14px; margin-top: 20px; }
+		.timestamp { color: #999; font-size: 12px; margin-top: 10px; }
+	</style>
+</head>
+<body>
+	<div class="error-container">
+		<h1>Error ${errorStatus}</h1>
+		<p>${randomMessage}</p>
+		<div class="error-code">Error Code: ${generateRequestId()}</div>
+		<div class="timestamp">Timestamp: ${timestamp}</div>
+	</div>
+</body>
+</html>`;
+		responseContentType = 'text/html';
+	}
+
+	return new Response(responseBody, {
+		status: errorStatus,
+		headers: {
+			'Content-Type': responseContentType,
+			Server: env?.SERVER_HEADER || getRandomServer(),
+			'X-Powered-By': env?.POWERED_BY_HEADER || getRandomPoweredBy(),
+			'Cache-Control': 'no-cache, no-store, must-revalidate',
+			Pragma: 'no-cache',
+			Expires: '0',
+			'X-Request-ID': generateRequestId(),
+			'X-Error-Source': 'application',
+		},
+	});
 }
