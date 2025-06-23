@@ -77,34 +77,50 @@ export default {
 				const delay = Math.floor(Math.random() * (maxDelay - minDelay)) + minDelay;
 				await new Promise((resolve) => setTimeout(resolve, delay));
 
+				const fakeContentLength = getFakeContentLength();
+
+				const headers = {
+					'Content-Type': contentType,
+					'Content-Length': fakeContentLength,
+					Server: env?.SERVER_HEADER || getRandomServer(),
+					'X-Powered-By': env?.POWERED_BY_HEADER || getRandomPoweredBy(),
+					'Cache-Control': 'no-cache, no-store, must-revalidate',
+					Pragma: 'no-cache',
+					Expires: '0',
+					'X-Frame-Options': 'SAMEORIGIN',
+					'X-Content-Type-Options': 'nosniff',
+					'Referrer-Policy': 'strict-origin-when-cross-origin',
+					'Content-Security-Policy': "default-src 'self'",
+					'X-Request-ID': generateRequestId(),
+					'X-Response-Time': `${delay}ms`,
+				};
+
+				// Add random fake size headers (20% chance)
+				addRandomFakeSizeHeaders(headers, fakeContentLength);
+
 				return new Response(fakeContent, {
 					status: 200,
-					headers: {
-						'Content-Type': contentType,
-						Server: env?.SERVER_HEADER || getRandomServer(),
-						'X-Powered-By': env?.POWERED_BY_HEADER || getRandomPoweredBy(),
-						'Cache-Control': 'no-cache, no-store, must-revalidate',
-						Pragma: 'no-cache',
-						Expires: '0',
-						'X-Frame-Options': 'SAMEORIGIN',
-						'X-Content-Type-Options': 'nosniff',
-						'Referrer-Policy': 'strict-origin-when-cross-origin',
-						'Content-Security-Policy': "default-src 'self'",
-						// Add some variation in response headers
-						'X-Request-ID': generateRequestId(),
-						'X-Response-Time': `${delay}ms`,
-					},
+					headers,
 				});
 			} catch (error) {
 				// Fallback response if generator fails
 				console.error(`Generator error for ${path}:`, error);
 
-				return new Response('Internal Server Error', {
+				const errorContent = 'Internal Server Error';
+				const fakeSize = getFakeContentLength();
+
+				const errorHeaders = {
+					'Content-Type': 'text/plain',
+					'Content-Length': fakeSize,
+					Server: getRandomServer(),
+				};
+
+				// Add random fake size headers (20% chance)
+				addRandomFakeSizeHeaders(errorHeaders, fakeSize);
+
+				return new Response(errorContent, {
 					status: 500,
-					headers: {
-						'Content-Type': 'text/plain',
-						Server: getRandomServer(),
-					},
+					headers: errorHeaders,
 				});
 			}
 		}
@@ -217,13 +233,21 @@ function generateNotFoundResponse(path: string, env?: any): Response {
 		contentType = 'text/html';
 	}
 
+	const fakeSize = getFakeContentLength();
+
+	const notFoundHeaders = {
+		'Content-Type': contentType,
+		'Content-Length': fakeSize,
+		Server: env?.SERVER_HEADER || getRandomServer(),
+		'X-Powered-By': env?.POWERED_BY_HEADER || getRandomPoweredBy(),
+	};
+
+	// Add random fake size headers (20% chance)
+	addRandomFakeSizeHeaders(notFoundHeaders, fakeSize);
+
 	return new Response(template, {
 		status: 404,
-		headers: {
-			'Content-Type': contentType,
-			Server: env?.SERVER_HEADER || getRandomServer(),
-			'X-Powered-By': env?.POWERED_BY_HEADER || getRandomPoweredBy(),
-		},
+		headers: notFoundHeaders,
 	});
 }
 
@@ -277,6 +301,56 @@ function generateRequestId(): string {
 		result += chars[Math.floor(Math.random() * chars.length)];
 	}
 	return result;
+}
+
+/**
+ * Generate a fake Content-Length header with very large value
+ */
+function getFakeContentLength(): string {
+	// Generate random large values between 100MB and 50GB
+	const minSize = 100 * 1024 * 1024; // 100MB
+	const maxSize = 50 * 1024 * 1024 * 1024; // 50GB
+	const fakeSize = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
+	return fakeSize.toString();
+}
+
+/**
+ * Add random fake size headers to confuse attackers
+ * Only adds headers 20% of the time with random combinations
+ */
+function addRandomFakeSizeHeaders(headers: Record<string, string>, fakeSize: string): void {
+	// 20% chance to add fake headers
+	if (Math.random() > 0.2) {
+		return;
+	}
+
+	// Available fake size headers
+	const fakeSizeHeaders = [
+		'X-Content-Length',
+		'X-Uncompressed-Content-Length',
+		'X-Original-Content-Length',
+		'X-Decompressed-Size',
+		'X-Raw-Content-Length',
+		'X-Expected-Size',
+		'X-File-Size',
+		'X-Total-Size',
+		'X-Download-Size',
+		'X-Payload-Length',
+		'Content-Range',
+	];
+
+	// Randomly select 1-4 headers to include
+	const numHeaders = Math.floor(Math.random() * 4) + 1;
+	const selectedHeaders = [...fakeSizeHeaders].sort(() => Math.random() - 0.5).slice(0, numHeaders);
+
+	// Add selected headers
+	selectedHeaders.forEach((headerName) => {
+		if (headerName === 'Content-Range') {
+			headers[headerName] = `bytes 0-${parseInt(fakeSize) - 1}/${fakeSize}`;
+		} else {
+			headers[headerName] = fakeSize;
+		}
+	});
 }
 
 /**
@@ -403,17 +477,25 @@ async function generateRandomErrorResponse(request: Request, env?: any): Promise
 		responseContentType = 'text/html';
 	}
 
+	const fakeSize = getFakeContentLength();
+
+	const postErrorHeaders = {
+		'Content-Type': responseContentType,
+		'Content-Length': fakeSize,
+		Server: env?.SERVER_HEADER || getRandomServer(),
+		'X-Powered-By': env?.POWERED_BY_HEADER || getRandomPoweredBy(),
+		'Cache-Control': 'no-cache, no-store, must-revalidate',
+		Pragma: 'no-cache',
+		Expires: '0',
+		'X-Request-ID': generateRequestId(),
+		'X-Error-Source': 'application',
+	};
+
+	// Add random fake size headers (20% chance)
+	addRandomFakeSizeHeaders(postErrorHeaders, fakeSize);
+
 	return new Response(responseBody, {
 		status: errorStatus,
-		headers: {
-			'Content-Type': responseContentType,
-			Server: env?.SERVER_HEADER || getRandomServer(),
-			'X-Powered-By': env?.POWERED_BY_HEADER || getRandomPoweredBy(),
-			'Cache-Control': 'no-cache, no-store, must-revalidate',
-			Pragma: 'no-cache',
-			Expires: '0',
-			'X-Request-ID': generateRequestId(),
-			'X-Error-Source': 'application',
-		},
+		headers: postErrorHeaders,
 	});
 }

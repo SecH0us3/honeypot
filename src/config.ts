@@ -201,23 +201,6 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 		generatorClass: BackupFileGenerator,
 		description: 'Archive file',
 	},
-
-	// Security files
-	{
-		pattern: 'robots\\.txt$',
-		generatorClass: BackupFileGenerator,
-		description: 'Robots.txt file',
-	},
-	{
-		pattern: 'sitemap\\.xml$',
-		generatorClass: BackupFileGenerator,
-		description: 'Sitemap XML file',
-	},
-	{
-		pattern: '\\.well-known/security\\.txt$',
-		generatorClass: BackupFileGenerator,
-		description: 'Security.txt file',
-	},
 ];
 
 // Helper function to create generator with context
