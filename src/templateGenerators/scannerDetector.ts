@@ -4,18 +4,30 @@ import { BaseTemplateGenerator, RandomDataContext, TemplateGenerator } from './t
 import { GitConfigGenerator, GitHeadGenerator, GitRefGenerator, GitIndexGenerator } from './gitGenerator';
 import { AdminPanelGenerator, PhpMyAdminGenerator } from './adminGenerator';
 import { WordPressLoginGenerator } from './wordpressGenerator';
-import { BackupFileGenerator, DatabaseFileGenerator, EnvironmentFileGenerator } from './fileGenerators';
+import {
+	BackupFileGenerator,
+	DatabaseFileGenerator,
+	EnvironmentFileGenerator,
+	CloudStorageFileGenerator,
+	DataLeakGenerator,
+} from './fileGenerators';
 import {
 	PhpInfoGenerator,
 	ComposerJsonGenerator,
 	PackageJsonGenerator,
 	HtaccessGenerator,
 	WebConfigGenerator,
+	SwaggerJsonGenerator,
+	DockerfileGenerator,
+	KubernetesConfigGenerator,
+	AwsConfigGenerator,
+	RobotsTxtGenerator,
+	SecurityTxtGenerator,
 } from './specializedGenerators';
 
 export class ScannerDetector {
 	private static readonly SCANNER_PATTERNS = [
-		// Web scanners and fuzzers
+		// Modern web scanners and fuzzers
 		/ffuf/i,
 		/feroxbuster/i,
 		/gobuster/i,
@@ -35,6 +47,96 @@ export class ScannerDetector {
 		/waybackurls/i,
 		/gau/i,
 		/katana/i,
+		/aquatone/i,
+		/dirsearch/i,
+		/dirmap/i,
+		/wpscan/i,
+		/joomscan/i,
+		/droopescan/i,
+		/cmseek/i,
+		/whatweb/i,
+		/sublist3r/i,
+		/knock/i,
+		/dnsrecon/i,
+		/fierce/i,
+		/theharvester/i,
+		/shodan/i,
+		/censys/i,
+		/masscan/i,
+		/rustscan/i,
+		/naabu/i,
+		/testssl/i,
+		/sslscan/i,
+		/sslyze/i,
+
+		// AI-powered and modern tools
+		/openai/i,
+		/chatgpt/i,
+		/gpt-/i,
+		/claude/i,
+		/anthropic/i,
+		/ai.*scanner/i,
+		/ml.*scanner/i,
+		/neural/i,
+
+		// Cloud and container scanners
+		/docker.*scan/i,
+		/trivy/i,
+		/clair/i,
+		/anchore/i,
+		/snyk/i,
+		/aqua.*scan/i,
+		/twistlock/i,
+		/qualys/i,
+		/rapid7/i,
+		/nessus/i,
+		/openvas/i,
+		/greenbone/i,
+
+		// API testing tools
+		/postman/i,
+		/insomnia/i,
+		/swagger.*ui/i,
+		/api.*test/i,
+		/rest.*client/i,
+		/graphql.*playground/i,
+		/altair/i,
+		/apollo.*studio/i,
+
+		// DevOps and CI/CD scanners
+		/jenkins/i,
+		/gitlab.*scanner/i,
+		/github.*scanner/i,
+		/sonarqube/i,
+		/sonar.*scanner/i,
+		/checkmarx/i,
+		/veracode/i,
+		/fortify/i,
+		/blackduck/i,
+		/whitesource/i,
+
+		// Penetration testing frameworks
+		/metasploit/i,
+		/msfconsole/i,
+		/meterpreter/i,
+		/cobalt.*strike/i,
+		/empire/i,
+		/covenant/i,
+		/silver/i,
+		/havoc/i,
+		/sliver/i,
+		/poshc2/i,
+
+		// OSINT tools
+		/maltego/i,
+		/spiderfoot/i,
+		/recon-ng/i,
+		/osintgram/i,
+		/social.*analyzer/i,
+		/sherlock/i,
+		/maigret/i,
+
+		// Traditional patterns
 		/crawler/i,
 		/spider/i,
 		/scanner/i,
@@ -51,32 +153,31 @@ export class ScannerDetector {
 		/medusa/i,
 		/john/i,
 		/hashcat/i,
-		/metasploit/i,
-		/msfconsole/i,
 		/kali/i,
 		/parrot/i,
 		/blackarch/i,
 		/pentoo/i,
 
-		// Automated tools
+		// Automated tools and scripts
 		/curl.*script/i,
 		/wget.*script/i,
 		/python.*requests/i,
 		/python.*urllib/i,
 		/python.*http/i,
+		/python.*aiohttp/i,
 		/golang/i,
 		/go-http-client/i,
 		/rust/i,
 		/node.*fetch/i,
 		/axios/i,
 		/httpie/i,
-		/postman/i,
-		/insomnia/i,
+		/powershell/i,
+		/invoke-webrequest/i,
+		/invoke-restmethod/i,
 
-		// Bot patterns
+		// Bot and automation patterns
 		/bot/i,
 		/crawl/i,
-		/spider/i,
 		/scraper/i,
 		/harvest/i,
 		/extract/i,
@@ -86,8 +187,10 @@ export class ScannerDetector {
 		/probe/i,
 		/audit/i,
 		/scan/i,
+		/validation/i,
+		/compliance/i,
 
-		// Suspicious patterns
+		// Suspicious automation indicators
 		/automated/i,
 		/script/i,
 		/tool/i,
@@ -96,8 +199,14 @@ export class ScannerDetector {
 		/agent/i,
 		/library/i,
 		/framework/i,
+		/headless/i,
+		/phantom/i,
+		/selenium/i,
+		/puppeteer/i,
+		/playwright/i,
+		/webdriver/i,
 
-		// Common scanner libraries
+		// Programming language HTTP libraries
 		/requests/i,
 		/urllib/i,
 		/http\.client/i,
@@ -117,11 +226,37 @@ export class ScannerDetector {
 		/mechanize/i,
 		/beautifulsoup/i,
 		/scrapy/i,
-		/selenium/i,
-		/phantomjs/i,
-		/headless/i,
 		/chrome.*headless/i,
 		/firefox.*headless/i,
+
+		// Mobile and IoT scanners
+		/android.*scanner/i,
+		/ios.*scanner/i,
+		/mobile.*scanner/i,
+		/iot.*scanner/i,
+		/embedded.*scanner/i,
+
+		// Blockchain and crypto scanners
+		/ethereum.*scanner/i,
+		/bitcoin.*scanner/i,
+		/crypto.*scanner/i,
+		/blockchain.*scanner/i,
+		/web3.*scanner/i,
+
+		// Version patterns that indicate tools
+		/\/\d+\.\d+/,
+		/v\d+\.\d+/,
+		/version.*\d+/i,
+
+		// Empty or minimal User-Agents (suspicious)
+		/^$/,
+		/^-$/,
+		/^null$/i,
+		/^undefined$/i,
+		/^test$/i,
+		/^scanner$/i,
+		/^tool$/i,
+		/^script$/i,
 	];
 
 	static isScannerUserAgent(userAgent: string): boolean {
@@ -159,10 +294,77 @@ export class ScannerDetector {
 			PackageJsonGenerator,
 			HtaccessGenerator,
 			WebConfigGenerator,
+			SwaggerJsonGenerator,
+			DockerfileGenerator,
+			KubernetesConfigGenerator,
+			AwsConfigGenerator,
+			RobotsTxtGenerator,
+			SecurityTxtGenerator,
+			CloudStorageFileGenerator,
+			DataLeakGenerator,
 		];
 
 		const randomIndex = Math.floor(Math.random() * generators.length);
 		return generators[randomIndex];
+	}
+
+	static getScannerType(userAgent: string): string {
+		if (!userAgent) return 'unknown';
+
+		const lowercaseUA = userAgent.toLowerCase();
+
+		// AI/ML tools
+		if (/openai|chatgpt|gpt-|claude|anthropic/.test(lowercaseUA)) return 'ai-powered';
+
+		// Professional security tools
+		if (/burpsuite|nessus|qualys|rapid7|checkmarx|veracode/.test(lowercaseUA)) return 'professional';
+
+		// Cloud/container scanners
+		if (/docker|trivy|snyk|aqua/.test(lowercaseUA)) return 'container';
+
+		// API testing tools
+		if (/postman|insomnia|swagger|graphql/.test(lowercaseUA)) return 'api-testing';
+
+		// Penetration testing frameworks
+		if (/metasploit|cobalt|empire|covenant/.test(lowercaseUA)) return 'pentest-framework';
+
+		// Web application scanners
+		if (/nikto|wpscan|nuclei|sqlmap/.test(lowercaseUA)) return 'webapp-scanner';
+
+		// Directory/file fuzzers
+		if (/ffuf|feroxbuster|gobuster|dirb|wfuzz/.test(lowercaseUA)) return 'fuzzer';
+
+		// OSINT tools
+		if (/maltego|spiderfoot|recon-ng|sherlock/.test(lowercaseUA)) return 'osint';
+
+		// Programming libraries
+		if (/requests|urllib|axios|okhttp|guzzle/.test(lowercaseUA)) return 'http-library';
+
+		// Headless browsers
+		if (/headless|phantom|selenium|puppeteer|playwright/.test(lowercaseUA)) return 'headless-browser';
+
+		// Generic scanners
+		if (/scan|crawl|spider|bot/.test(lowercaseUA)) return 'generic-scanner';
+
+		return 'unknown';
+	}
+
+	static getScannerSophistication(userAgent: string): 'low' | 'medium' | 'high' {
+		const scannerType = this.getScannerType(userAgent);
+		const score = this.getScannerScore(userAgent);
+
+		// High sophistication
+		if (['ai-powered', 'professional', 'pentest-framework'].includes(scannerType) || score >= 5) {
+			return 'high';
+		}
+
+		// Medium sophistication
+		if (['container', 'api-testing', 'webapp-scanner', 'osint'].includes(scannerType) || score >= 2) {
+			return 'medium';
+		}
+
+		// Low sophistication
+		return 'low';
 	}
 }
 
@@ -205,21 +407,56 @@ export class EnhancedScannerResponseGenerator extends BaseTemplateGenerator {
 		// Choose generator based on scanner sophistication
 		let GeneratorClass: new (context?: RandomDataContext) => TemplateGenerator;
 
-		if (this.scannerScore >= 3) {
-			// High-sophistication scanner - give them something complex
-			GeneratorClass = this.getRandomItem([
-				PhpInfoGenerator,
-				ComposerJsonGenerator,
-				PackageJsonGenerator,
-				DatabaseFileGenerator,
-				EnvironmentFileGenerator,
-			]);
-		} else if (this.scannerScore >= 1) {
-			// Basic scanner - simple responses
-			GeneratorClass = this.getRandomItem([AdminPanelGenerator, WordPressLoginGenerator, BackupFileGenerator, HtaccessGenerator]);
+		const sophistication = ScannerDetector.getScannerSophistication(context.userAgent || '');
+		const scannerType = ScannerDetector.getScannerType(context.userAgent || '');
+
+		if (sophistication === 'high') {
+			// High-sophistication scanner - give them complex, realistic responses
+			if (scannerType === 'ai-powered') {
+				GeneratorClass = this.getRandomItem([DataLeakGenerator, SwaggerJsonGenerator, AwsConfigGenerator]);
+			} else if (scannerType === 'professional') {
+				GeneratorClass = this.getRandomItem([DatabaseFileGenerator, EnvironmentFileGenerator, CloudStorageFileGenerator]);
+			} else if (scannerType === 'container') {
+				GeneratorClass = this.getRandomItem([DockerfileGenerator, KubernetesConfigGenerator, AwsConfigGenerator]);
+			} else {
+				GeneratorClass = this.getRandomItem([
+					PhpInfoGenerator,
+					ComposerJsonGenerator,
+					PackageJsonGenerator,
+					DatabaseFileGenerator,
+					EnvironmentFileGenerator,
+					DataLeakGenerator,
+				]);
+			}
+		} else if (sophistication === 'medium') {
+			// Medium scanner - moderate complexity
+			if (scannerType === 'api-testing') {
+				GeneratorClass = this.getRandomItem([SwaggerJsonGenerator, ComposerJsonGenerator, PackageJsonGenerator]);
+			} else if (scannerType === 'webapp-scanner') {
+				GeneratorClass = this.getRandomItem([AdminPanelGenerator, WordPressLoginGenerator, PhpInfoGenerator]);
+			} else if (scannerType === 'container') {
+				GeneratorClass = this.getRandomItem([DockerfileGenerator, EnvironmentFileGenerator]);
+			} else if (scannerType === 'osint') {
+				GeneratorClass = this.getRandomItem([RobotsTxtGenerator, SecurityTxtGenerator, BackupFileGenerator]);
+			} else {
+				GeneratorClass = this.getRandomItem([
+					AdminPanelGenerator,
+					WordPressLoginGenerator,
+					BackupFileGenerator,
+					HtaccessGenerator,
+					EnvironmentFileGenerator,
+					SwaggerJsonGenerator,
+				]);
+			}
 		} else {
-			// Fallback to random
-			GeneratorClass = ScannerDetector.getRandomGenerator(context);
+			// Low sophistication or unknown - simple responses
+			GeneratorClass = this.getRandomItem([
+				AdminPanelGenerator,
+				WordPressLoginGenerator,
+				BackupFileGenerator,
+				HtaccessGenerator,
+				RobotsTxtGenerator,
+			]);
 		}
 
 		this.selectedGenerator = new GeneratorClass(context);
@@ -229,8 +466,13 @@ export class EnhancedScannerResponseGenerator extends BaseTemplateGenerator {
 		// Calculate scanner score here to avoid initialization order issues
 		const scannerScore = ScannerDetector.getScannerScore(this.context.userAgent || '');
 
+		const scannerType = ScannerDetector.getScannerType(this.context.userAgent || '');
+		const sophistication = ScannerDetector.getScannerSophistication(this.context.userAgent || '');
+
 		this.variables = {
 			scannerScore: scannerScore.toString(),
+			scannerType: scannerType,
+			sophistication: sophistication,
 			userAgent: this.context.userAgent || 'Unknown',
 			detectedAt: this.context.timestamp?.toISOString() || new Date().toISOString(),
 			clientIp: this.context.clientIp || 'Unknown',
@@ -238,8 +480,11 @@ export class EnhancedScannerResponseGenerator extends BaseTemplateGenerator {
 	}
 
 	generate(): string {
-		// Add scanner detection metadata as HTML comment for logging
-		const metadata = `<!-- Scanner detected: ${this.context.userAgent} | Score: ${this.scannerScore} | IP: ${this.context.clientIp} | Time: ${this.context.timestamp?.toISOString()} -->
+		// Add enhanced scanner detection metadata as HTML comment for logging
+		const scannerType = ScannerDetector.getScannerType(this.context.userAgent || '');
+		const sophistication = ScannerDetector.getScannerSophistication(this.context.userAgent || '');
+
+		const metadata = `<!-- Scanner detected: ${this.context.userAgent} | Type: ${scannerType} | Sophistication: ${sophistication} | Score: ${this.scannerScore} | IP: ${this.context.clientIp} | Time: ${this.context.timestamp?.toISOString()} -->
 `;
 
 		const content = this.selectedGenerator.generate();
@@ -257,6 +502,8 @@ export class EnhancedScannerResponseGenerator extends BaseTemplateGenerator {
 	}
 
 	getDescription(): string {
-		return `Enhanced scanner response (score: ${this.scannerScore}) - ${this.selectedGenerator.getDescription()}`;
+		const scannerType = ScannerDetector.getScannerType(this.context.userAgent || '');
+		const sophistication = ScannerDetector.getScannerSophistication(this.context.userAgent || '');
+		return `Enhanced scanner response (type: ${scannerType}, sophistication: ${sophistication}, score: ${this.scannerScore}) - ${this.selectedGenerator.getDescription()}`;
 	}
 }

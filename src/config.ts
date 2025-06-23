@@ -3,13 +3,25 @@
 import { GitConfigGenerator, GitHeadGenerator, GitRefGenerator, GitIndexGenerator } from './templateGenerators/gitGenerator';
 import { AdminPanelGenerator, PhpMyAdminGenerator } from './templateGenerators/adminGenerator';
 import { WordPressLoginGenerator } from './templateGenerators/wordpressGenerator';
-import { BackupFileGenerator, DatabaseFileGenerator, EnvironmentFileGenerator } from './templateGenerators/fileGenerators';
+import {
+	BackupFileGenerator,
+	DatabaseFileGenerator,
+	EnvironmentFileGenerator,
+	CloudStorageFileGenerator,
+	DataLeakGenerator,
+} from './templateGenerators/fileGenerators';
 import {
 	PhpInfoGenerator,
 	ComposerJsonGenerator,
 	PackageJsonGenerator,
 	HtaccessGenerator,
 	WebConfigGenerator,
+	SwaggerJsonGenerator,
+	DockerfileGenerator,
+	KubernetesConfigGenerator,
+	AwsConfigGenerator,
+	RobotsTxtGenerator,
+	SecurityTxtGenerator,
 } from './templateGenerators/specializedGenerators';
 import { RandomScannerResponseGenerator, EnhancedScannerResponseGenerator, ScannerDetector } from './templateGenerators/scannerDetector';
 import { TemplateGenerator, RandomDataContext } from './templateGenerators/types';
@@ -21,13 +33,6 @@ export interface HoneypotRule {
 }
 
 export const HONEYPOT_RULES: HoneypotRule[] = [
-	// User-Agent based scanner detection (highest priority)
-	{
-		pattern: '.*', // Matches any path
-		generatorClass: EnhancedScannerResponseGenerator,
-		description: 'Scanner detection based on User-Agent',
-	},
-
 	// Git files
 	{
 		pattern: '\\.git/config$',
@@ -215,6 +220,276 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 		pattern: '\\.(zip|tar|gz|rar|7z)$',
 		generatorClass: BackupFileGenerator,
 		description: 'Archive file',
+	},
+
+	// API endpoints
+	{
+		pattern: 'api/(v1|v2|v3)/.*$',
+		generatorClass: SwaggerJsonGenerator,
+		description: 'API endpoint',
+	},
+	{
+		pattern: 'graphql/?$',
+		generatorClass: SwaggerJsonGenerator,
+		description: 'GraphQL endpoint',
+	},
+	{
+		pattern: 'swagger\\.json$',
+		generatorClass: SwaggerJsonGenerator,
+		description: 'Swagger API documentation',
+	},
+	{
+		pattern: 'openapi\\.json$',
+		generatorClass: SwaggerJsonGenerator,
+		description: 'OpenAPI specification',
+	},
+	{
+		pattern: 'api-docs/?$',
+		generatorClass: SwaggerJsonGenerator,
+		description: 'API documentation',
+	},
+
+	// Cloud configuration files
+	{
+		pattern: '\\.aws/(config|credentials)$',
+		generatorClass: AwsConfigGenerator,
+		description: 'AWS configuration file',
+	},
+	{
+		pattern: 'aws-exports\\.js$',
+		generatorClass: AwsConfigGenerator,
+		description: 'AWS Amplify exports',
+	},
+	{
+		pattern: 'serverless\\.yml$',
+		generatorClass: AwsConfigGenerator,
+		description: 'Serverless framework configuration',
+	},
+	{
+		pattern: 'cloudformation\\.json$',
+		generatorClass: AwsConfigGenerator,
+		description: 'CloudFormation template',
+	},
+
+	// Container and DevOps files
+	{
+		pattern: 'Dockerfile$',
+		generatorClass: DockerfileGenerator,
+		description: 'Docker configuration',
+	},
+	{
+		pattern: 'docker-compose\\.ya?ml$',
+		generatorClass: DockerfileGenerator,
+		description: 'Docker Compose configuration',
+	},
+	{
+		pattern: '\\.dockerignore$',
+		generatorClass: BackupFileGenerator,
+		description: 'Docker ignore file',
+	},
+	{
+		pattern: 'kubernetes\\.ya?ml$',
+		generatorClass: KubernetesConfigGenerator,
+		description: 'Kubernetes configuration',
+	},
+	{
+		pattern: 'k8s\\.ya?ml$',
+		generatorClass: KubernetesConfigGenerator,
+		description: 'Kubernetes configuration',
+	},
+
+	// CI/CD files
+	{
+		pattern: '\\.github/workflows/.*\\.ya?ml$',
+		generatorClass: BackupFileGenerator,
+		description: 'GitHub Actions workflow',
+	},
+	{
+		pattern: '\\.gitlab-ci\\.ya?ml$',
+		generatorClass: BackupFileGenerator,
+		description: 'GitLab CI configuration',
+	},
+	{
+		pattern: 'Jenkinsfile$',
+		generatorClass: BackupFileGenerator,
+		description: 'Jenkins pipeline configuration',
+	},
+
+	// Modern configuration files
+	{
+		pattern: '\\.(ya?ml|toml|properties|cfg)$',
+		generatorClass: EnvironmentFileGenerator,
+		description: 'Configuration file',
+	},
+	{
+		pattern: 'next\\.config\\.js$',
+		generatorClass: PackageJsonGenerator,
+		description: 'Next.js configuration',
+	},
+	{
+		pattern: 'nuxt\\.config\\.js$',
+		generatorClass: PackageJsonGenerator,
+		description: 'Nuxt.js configuration',
+	},
+	{
+		pattern: 'vue\\.config\\.js$',
+		generatorClass: PackageJsonGenerator,
+		description: 'Vue.js configuration',
+	},
+	{
+		pattern: 'webpack\\.config\\.js$',
+		generatorClass: PackageJsonGenerator,
+		description: 'Webpack configuration',
+	},
+	{
+		pattern: 'vite\\.config\\.(js|ts)$',
+		generatorClass: PackageJsonGenerator,
+		description: 'Vite configuration',
+	},
+
+	// Security and SEO files
+	{
+		pattern: 'robots\\.txt$',
+		generatorClass: RobotsTxtGenerator,
+		description: 'Robots.txt file',
+	},
+	{
+		pattern: '\\.well-known/security\\.txt$',
+		generatorClass: SecurityTxtGenerator,
+		description: 'Security.txt file',
+	},
+	{
+		pattern: 'sitemap\\.xml$',
+		generatorClass: BackupFileGenerator,
+		description: 'XML sitemap',
+	},
+
+	// IDE and editor files
+	{
+		pattern: '\\.vscode/(settings|launch)\\.json$',
+		generatorClass: PackageJsonGenerator,
+		description: 'VS Code configuration',
+	},
+	{
+		pattern: '\\.idea/.*$',
+		generatorClass: BackupFileGenerator,
+		description: 'IntelliJ IDEA configuration',
+	},
+
+	// Database and cache files
+	{
+		pattern: 'redis\\.conf$',
+		generatorClass: EnvironmentFileGenerator,
+		description: 'Redis configuration',
+	},
+	{
+		pattern: 'mongodb\\.conf$',
+		generatorClass: EnvironmentFileGenerator,
+		description: 'MongoDB configuration',
+	},
+	{
+		pattern: 'nginx\\.conf$',
+		generatorClass: HtaccessGenerator,
+		description: 'Nginx configuration',
+	},
+
+	// Backup directories
+	{
+		pattern: '(backup|backups|old|archive)/?.*$',
+		generatorClass: BackupFileGenerator,
+		description: 'Backup directory',
+	},
+	{
+		pattern: '(tmp|temp|cache)/?.*$',
+		generatorClass: BackupFileGenerator,
+		description: 'Temporary directory',
+	},
+
+	// Version control systems
+	{
+		pattern: '\\.svn/entries$',
+		generatorClass: GitConfigGenerator,
+		description: 'SVN entries file',
+	},
+	{
+		pattern: '\\.hg/hgrc$',
+		generatorClass: GitConfigGenerator,
+		description: 'Mercurial configuration',
+	},
+
+	// Mobile app files
+	{
+		pattern: 'AndroidManifest\\.xml$',
+		generatorClass: WebConfigGenerator,
+		description: 'Android manifest',
+	},
+	{
+		pattern: 'Info\\.plist$',
+		generatorClass: WebConfigGenerator,
+		description: 'iOS Info.plist',
+	},
+
+	// Cryptocurrency and blockchain
+	{
+		pattern: 'wallet\\.dat$',
+		generatorClass: DatabaseFileGenerator,
+		description: 'Cryptocurrency wallet',
+	},
+	{
+		pattern: 'keystore\\.json$',
+		generatorClass: EnvironmentFileGenerator,
+		description: 'Ethereum keystore',
+	},
+
+	// Cloud storage configurations
+	{
+		pattern: 's3\\.config$',
+		generatorClass: CloudStorageFileGenerator,
+		description: 'S3 configuration file',
+	},
+	{
+		pattern: 'gcp-credentials\\.json$',
+		generatorClass: CloudStorageFileGenerator,
+		description: 'Google Cloud credentials',
+	},
+	{
+		pattern: 'azure-storage\\.conf$',
+		generatorClass: CloudStorageFileGenerator,
+		description: 'Azure storage configuration',
+	},
+
+	// Data leak patterns (high-value targets)
+	{
+		pattern: 'dump\\.sql$',
+		generatorClass: DataLeakGenerator,
+		description: 'Database dump file',
+	},
+	{
+		pattern: 'users\\.csv$',
+		generatorClass: DataLeakGenerator,
+		description: 'User data export',
+	},
+	{
+		pattern: 'credentials\\.txt$',
+		generatorClass: DataLeakGenerator,
+		description: 'Credential file',
+	},
+	{
+		pattern: 'passwords\\.txt$',
+		generatorClass: DataLeakGenerator,
+		description: 'Password file',
+	},
+	{
+		pattern: 'emails\\.mbox$',
+		generatorClass: DataLeakGenerator,
+		description: 'Email archive',
+	},
+
+	// User-Agent based scanner detection (lowest priority - catch-all)
+	{
+		pattern: '.*', // Matches any path
+		generatorClass: EnhancedScannerResponseGenerator,
+		description: 'Scanner detection based on User-Agent',
 	},
 ];
 

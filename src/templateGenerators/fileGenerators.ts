@@ -822,3 +822,465 @@ url_path = /uploads/`,
 		return 'Environment configuration file';
 	}
 }
+
+export class CloudStorageFileGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			bucketName: `${this.context.companyDomain?.replace(/\./g, '-') || 'company'}-backups`,
+			region: this.getRandomItem(['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1']),
+			accessKey: this.generateRandomKey(20),
+			secretKey: this.generateRandomKey(40),
+			endpoint: this.context.companyDomain || 'storage.example.com',
+			storageClass: this.getRandomItem(['STANDARD', 'STANDARD_IA', 'GLACIER']),
+			timestamp: this.context.timestamp?.toISOString() || new Date().toISOString(),
+		};
+	}
+
+	generate(): string {
+		return this.replaceVariables(`# Cloud Storage Configuration
+# Generated: {{timestamp}}
+
+[default]
+bucket_name = {{bucketName}}
+region = {{region}}
+access_key = AKIA{{accessKey}}
+secret_key = {{secretKey}}
+endpoint_url = https://s3.{{region}}.amazonaws.com
+storage_class = {{storageClass}}
+
+# Backup locations
+backup_locations = [
+    "s3://{{bucketName}}/database-backups/",
+    "s3://{{bucketName}}/application-backups/",
+    "s3://{{bucketName}}/user-data/"
+]
+
+# Retention policy
+retention_days = 90
+versioning = enabled
+encryption = AES256
+
+# Access logs
+log_bucket = {{bucketName}}-access-logs
+log_prefix = access-logs/
+
+# CORS configuration
+cors_rules = [
+    {
+        "allowed_origins": ["https://{{endpoint}}"],
+        "allowed_methods": ["GET", "POST", "PUT", "DELETE"],
+        "allowed_headers": ["*"],
+        "max_age_seconds": 3600
+    }
+]
+
+# Lifecycle rules
+lifecycle_rules = [
+    {
+        "id": "cleanup-old-backups",
+        "status": "Enabled",
+        "expiration_days": 365,
+        "noncurrent_version_expiration_days": 30
+    }
+]`);
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Cloud storage configuration file';
+	}
+}
+
+export class DataLeakGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			companyName: this.context.companyName || 'TechCorp Inc',
+			domain: this.context.companyDomain || 'techcorp.com',
+			adminEmail: this.context.adminEmail || 'admin@techcorp.com',
+			dbHost: 'db-prod-01.private.local',
+			dbUser: 'app_user',
+			dbPassword: this.generateRandomKey(16),
+			apiKey: this.generateRandomKey(32),
+			jwtSecret: this.generateRandomKey(64),
+			encryptionKey: this.generateRandomKey(32),
+			stripeKey: 'sk_live_' + this.generateRandomKey(24),
+			awsKey: 'AKIA' + this.generateRandomKey(16),
+			timestamp: this.context.timestamp?.toISOString() || new Date().toISOString(),
+		};
+	}
+
+	generate(): string {
+		const leakTypes = [
+			'customer_database',
+			'employee_records',
+			'financial_data',
+			'api_credentials',
+			'internal_emails',
+			'source_code_backup',
+		];
+
+		const selectedType = this.getRandomItem(leakTypes);
+
+		switch (selectedType) {
+			case 'customer_database':
+				return this.generateCustomerData();
+			case 'employee_records':
+				return this.generateEmployeeData();
+			case 'financial_data':
+				return this.generateFinancialData();
+			case 'api_credentials':
+				return this.generateApiCredentials();
+			case 'internal_emails':
+				return this.generateEmailData();
+			default:
+				return this.generateSourceCodeBackup();
+		}
+	}
+
+	private generateCustomerData(): string {
+		return this.replaceVariables(`-- Customer Database Dump
+-- Company: {{companyName}}
+-- Exported: {{timestamp}}
+-- CONFIDENTIAL - INTERNAL USE ONLY
+
+CREATE TABLE customers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    phone VARCHAR(20),
+    credit_card_hash VARCHAR(255),
+    billing_address TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP,
+    subscription_tier ENUM('free', 'premium', 'enterprise'),
+    total_spent DECIMAL(10,2)
+);
+
+INSERT INTO customers VALUES
+(1, 'john.doe@email.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/LQ2/4P5K2', 'John', 'Doe', '+1-555-0123', '4***-****-****-1234', '123 Main St, Anytown, ST 12345', '2023-01-15 10:30:00', '2024-01-10 14:22:33', 'premium', 1250.00),
+(2, 'jane.smith@company.com', '$2b$12$8QXvf2qBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeJdBPj/LQ2/4P5K3', 'Jane', 'Smith', '+1-555-0456', '5***-****-****-5678', '456 Oak Ave, Business City, ST 67890', '2023-02-20 09:15:00', '2024-01-09 16:45:12', 'enterprise', 5750.00),
+(3, 'mike.johnson@startup.io', '$2b$12$9RYwg3rCXWIyxle1MIBlDPZa7UuyNRKriO9/MfxeCQk/MR3/5Q6L4', 'Mike', 'Johnson', '+1-555-0789', '6***-****-****-9012', '789 Tech Blvd, Silicon Valley, CA 94000', '2023-03-10 11:45:00', '2024-01-08 08:30:45', 'premium', 3200.00);
+
+-- Payment methods table
+CREATE TABLE payment_methods (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    card_number_encrypted VARCHAR(255),
+    expiry_month INT,
+    expiry_year INT,
+    cardholder_name VARCHAR(100),
+    billing_zip VARCHAR(10),
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+-- WARNING: This data contains sensitive customer information
+-- Access restricted to authorized personnel only`);
+	}
+
+	private generateEmployeeData(): string {
+		return this.replaceVariables(`# Employee Records Export
+# {{companyName}} - Human Resources Database
+# Export Date: {{timestamp}}
+# Classification: CONFIDENTIAL
+
+Employee ID,Full Name,Email,Department,Salary,SSN,Hire Date,Manager,Performance Rating
+EMP001,Sarah Williams,s.williams@{{domain}},Engineering,125000,***-**-1234,2022-03-15,John Smith,Exceeds Expectations
+EMP002,David Chen,d.chen@{{domain}},Engineering,115000,***-**-5678,2022-01-10,John Smith,Meets Expectations
+EMP003,Lisa Rodriguez,l.rodriguez@{{domain}},Marketing,85000,***-**-9012,2021-11-20,Mary Johnson,Exceeds Expectations
+EMP004,Robert Taylor,r.taylor@{{domain}},Sales,95000,***-**-3456,2021-08-05,Michael Brown,Meets Expectations
+EMP005,Jennifer Davis,j.davis@{{domain}},HR,75000,***-**-7890,2020-06-12,Susan Wilson,Exceeds Expectations
+
+# Emergency Contacts
+Employee ID,Contact Name,Relationship,Phone,Email
+EMP001,Mark Williams,Spouse,555-0123,mark.w@email.com
+EMP002,Helen Chen,Mother,555-0456,helen.chen@email.com
+EMP003,Carlos Rodriguez,Brother,555-0789,carlos.r@email.com
+
+# Benefits Information
+Employee ID,Health Plan,Dental,Vision,401k Contribution,Stock Options
+EMP001,Premium PPO,Yes,Yes,15%,5000 shares
+EMP002,Standard HMO,Yes,No,12%,2500 shares
+EMP003,Premium PPO,Yes,Yes,10%,1000 shares
+
+# NOTICE: This file contains personally identifiable information (PII)
+# Handle according to company data protection policies`);
+	}
+
+	private generateFinancialData(): string {
+		return this.replaceVariables(`{
+  "financial_report": {
+    "company": "{{companyName}}",
+    "period": "Q4 2023",
+    "generated": "{{timestamp}}",
+    "classification": "CONFIDENTIAL",
+    "revenue": {
+      "total": 15750000,
+      "recurring": 12500000,
+      "one_time": 3250000,
+      "breakdown": {
+        "subscriptions": 8500000,
+        "enterprise_licenses": 4000000,
+        "consulting": 2250000,
+        "support": 1000000
+      }
+    },
+    "expenses": {
+      "total": 11200000,
+      "salaries": 6800000,
+      "infrastructure": 1500000,
+      "marketing": 1200000,
+      "office": 800000,
+      "legal": 400000,
+      "other": 500000
+    },
+    "customers": {
+      "total": 15420,
+      "new_acquisitions": 1250,
+      "churn_rate": 0.035,
+      "ltv": 8750,
+      "cac": 425
+    },
+    "banking": {
+      "primary_account": "****-****-****-5678",
+      "routing": "021000021",
+      "balance": 4550000,
+      "credit_facilities": [
+        {
+          "bank": "First National Bank",
+          "limit": 5000000,
+          "used": 1200000,
+          "rate": 0.045
+        }
+      ]
+    },
+    "tax_info": {
+      "ein": "**-*******",
+      "estimated_liability": 1365000,
+      "quarterly_payments": 341250
+    }
+  }
+}`);
+	}
+
+	private generateApiCredentials(): string {
+		return this.replaceVariables(`# API Credentials and Keys
+# {{companyName}} Production Environment
+# Last Updated: {{timestamp}}
+# ACCESS LEVEL: RESTRICTED
+
+# Database Connections
+DATABASE_URL=postgresql://{{dbUser}}:{{dbPassword}}@{{dbHost}}:5432/production
+REDIS_URL=redis://redis-cluster.{{domain}}:6379/0
+MONGODB_URI=mongodb://prod-user:{{dbPassword}}@mongo-cluster.{{domain}}:27017/app_prod
+
+# External API Keys
+STRIPE_SECRET_KEY={{stripeKey}}
+STRIPE_PUBLISHABLE_KEY=pk_live_{{apiKey}}
+PAYPAL_CLIENT_ID=AY{{apiKey}}
+PAYPAL_CLIENT_SECRET={{apiKey}}
+
+# AWS Services
+AWS_ACCESS_KEY_ID={{awsKey}}
+AWS_SECRET_ACCESS_KEY={{jwtSecret}}
+AWS_DEFAULT_REGION=us-east-1
+S3_BUCKET={{companyName}}-prod-storage
+
+# Authentication
+JWT_SECRET={{jwtSecret}}
+ENCRYPTION_KEY={{encryptionKey}}
+SESSION_SECRET={{apiKey}}
+
+# Third Party Integrations
+SENDGRID_API_KEY=SG.{{apiKey}}
+TWILIO_ACCOUNT_SID=AC{{apiKey}}
+TWILIO_AUTH_TOKEN={{encryptionKey}}
+GOOGLE_ANALYTICS_ID=G-{{apiKey}}
+GOOGLE_OAUTH_CLIENT_ID={{apiKey}}.apps.googleusercontent.com
+GOOGLE_OAUTH_SECRET={{encryptionKey}}
+
+# Monitoring and Logging
+DATADOG_API_KEY={{apiKey}}
+SENTRY_DSN=https://{{apiKey}}@o123456.ingest.sentry.io/234567
+NEW_RELIC_LICENSE_KEY={{jwtSecret}}
+
+# Social Media APIs
+TWITTER_API_KEY={{apiKey}}
+TWITTER_API_SECRET={{encryptionKey}}
+FACEBOOK_APP_ID={{apiKey}}
+FACEBOOK_APP_SECRET={{jwtSecret}}
+
+# Internal Services
+INTERNAL_API_KEY={{apiKey}}
+WEBHOOK_SECRET={{encryptionKey}}
+ADMIN_PANEL_SECRET={{jwtSecret}}
+
+# WARNING: These are production credentials
+# Unauthorized access or disclosure is prohibited`);
+	}
+
+	private generateEmailData(): string {
+		return this.replaceVariables(`From: {{adminEmail}}
+To: ceo@{{domain}}
+Subject: Q4 Financial Results - CONFIDENTIAL
+Date: {{timestamp}}
+
+Hi team,
+
+Attached are the preliminary Q4 results. Please keep this confidential until the board meeting.
+
+Key highlights:
+- Revenue exceeded targets by 12%
+- Customer acquisition costs down 8%
+- Major enterprise deal with TechGiant Corp signed ($2.5M ARR)
+- Planning Series B funding round for Q2 2024
+
+The detailed breakdown is in the attached financial report. Let's discuss strategy for the upcoming board presentation.
+
+Best regards,
+CFO
+
+---
+
+From: hr@{{domain}}
+To: all-staff@{{domain}}
+Subject: Salary Adjustment Notifications
+Date: {{timestamp}}
+
+Dear Team,
+
+Following our annual performance reviews, salary adjustments will take effect next month:
+
+Engineering Team:
+- Senior developers: 8% increase
+- Junior developers: 12% increase
+- Tech leads: 10% increase
+
+Sales Team:
+- Account executives: 6% increase + new commission structure
+- Sales managers: 7% increase
+
+Marketing Team:
+- Marketing specialists: 9% increase
+- Marketing managers: 8% increase
+
+Individual notifications will be sent by end of week.
+
+HR Department
+
+---
+
+From: security@{{domain}}
+To: it-team@{{domain}}
+Subject: URGENT: Security Incident Response
+Date: {{timestamp}}
+
+Team,
+
+We detected unusual access patterns on our production database.
+
+Timeline:
+- 14:32 - Automated alert triggered
+- 14:35 - Confirmed unauthorized access attempt
+- 14:40 - Implemented emergency lockdown
+- 15:00 - All systems secured
+
+Actions taken:
+1. Changed all production passwords
+2. Revoked potentially compromised API keys
+3. Enabled additional monitoring
+4. Contacted cyber insurance provider
+
+No customer data appears to have been accessed. Full incident report follows.
+
+Security Team`);
+	}
+
+	private generateSourceCodeBackup(): string {
+		return this.replaceVariables(`/*
+ * {{companyName}} - Production Configuration
+ * Generated: {{timestamp}}
+ * Environment: Production
+ * WARNING: Contains sensitive configuration data
+ */
+
+const config = {
+  database: {
+    host: "{{dbHost}}",
+    user: "{{dbUser}}",
+    password: "{{dbPassword}}",
+    database: "production",
+    port: 5432,
+    ssl: true,
+    pool: {
+      min: 5,
+      max: 20,
+      idle: 10000
+    }
+  },
+
+  redis: {
+    host: "redis-cluster.{{domain}}",
+    port: 6379,
+    password: "{{encryptionKey}}",
+    db: 0
+  },
+
+  security: {
+    jwtSecret: "{{jwtSecret}}",
+    encryptionKey: "{{encryptionKey}}",
+    sessionSecret: "{{apiKey}}",
+    bcryptRounds: 12
+  },
+
+  payments: {
+    stripe: {
+      secretKey: "{{stripeKey}}",
+      webhookSecret: "whsec_{{encryptionKey}}"
+    },
+    paypal: {
+      clientId: "AY{{apiKey}}",
+      clientSecret: "{{encryptionKey}}"
+    }
+  },
+
+  aws: {
+    accessKeyId: "{{awsKey}}",
+    secretAccessKey: "{{jwtSecret}}",
+    region: "us-east-1",
+    s3Bucket: "{{companyName}}-prod-assets"
+  },
+
+  email: {
+    sendgrid: {
+      apiKey: "SG.{{apiKey}}"
+    },
+    smtp: {
+      host: "smtp.{{domain}}",
+      user: "noreply@{{domain}}",
+      password: "{{encryptionKey}}"
+    }
+  },
+
+  monitoring: {
+    sentry: "https://{{apiKey}}@sentry.io/123456",
+    datadog: "{{apiKey}}",
+    newRelic: "{{jwtSecret}}"
+  }
+};
+
+module.exports = config;`);
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Sensitive data leak simulation';
+	}
+}

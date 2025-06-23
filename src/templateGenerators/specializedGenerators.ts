@@ -14,7 +14,7 @@ export class PhpInfoGenerator extends BaseTemplateGenerator {
 			loadedModules: this.getRandomItem([
 				'mod_rewrite, mod_ssl, mod_php',
 				'mod_rewrite, mod_headers, mod_expires',
-				'mod_ssl, mod_deflate, mod_security'
+				'mod_ssl, mod_deflate, mod_security',
 			]),
 			maxExecutionTime: this.getRandomItem(['30', '60', '300']),
 			memoryLimit: this.getRandomItem(['128M', '256M', '512M']),
@@ -24,7 +24,7 @@ export class PhpInfoGenerator extends BaseTemplateGenerator {
 			includePath: '.:/usr/share/php',
 			userAgent: this.context.userAgent || 'Unknown',
 			remoteAddr: this.context.clientIp || '127.0.0.1',
-			timestamp: this.context.timestamp?.toISOString() || new Date().toISOString()
+			timestamp: this.context.timestamp?.toISOString() || new Date().toISOString(),
 		};
 	}
 
@@ -105,7 +105,7 @@ export class ComposerJsonGenerator extends BaseTemplateGenerator {
 			phpVersion: '^8.0',
 			laravelVersion: '^9.0',
 			authorName: this.context.adminEmail || 'developer@example.com',
-			timestamp: this.context.timestamp?.toISOString() || new Date().toISOString()
+			timestamp: this.context.timestamp?.toISOString() || new Date().toISOString(),
 		};
 	}
 
@@ -196,7 +196,7 @@ export class PackageJsonGenerator extends BaseTemplateGenerator {
 			authorEmail: this.context.adminEmail || 'developer@example.com',
 			nodeVersion: '>=16.0.0',
 			reactVersion: '^18.2.0',
-			nextVersion: '^13.4.0'
+			nextVersion: '^13.4.0',
 		};
 	}
 
@@ -270,7 +270,7 @@ export class HtaccessGenerator extends BaseTemplateGenerator {
 			serverName: this.context.companyDomain || 'example.com',
 			adminEmail: this.context.adminEmail || 'admin@example.com',
 			documentRoot: '/var/www/html',
-			rewriteBase: '/'
+			rewriteBase: '/',
 		};
 	}
 
@@ -375,7 +375,7 @@ export class WebConfigGenerator extends BaseTemplateGenerator {
 	protected initializeVariables(): void {
 		this.variables = {
 			serverName: this.context.companyDomain || 'example.com',
-			adminEmail: this.context.adminEmail || 'admin@example.com'
+			adminEmail: this.context.adminEmail || 'admin@example.com',
 		};
 	}
 
@@ -482,5 +482,473 @@ export class WebConfigGenerator extends BaseTemplateGenerator {
 
 	getDescription(): string {
 		return 'IIS web.config file';
+	}
+}
+
+export class SwaggerJsonGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			title: this.context.companyName || 'API',
+			version: this.generateRandomVersion(),
+			serverUrl: `https://${this.context.companyDomain || 'api.example.com'}`,
+			contactEmail: this.context.adminEmail || 'api@example.com',
+			description: 'RESTful API documentation',
+		};
+	}
+
+	generate(): string {
+		return this.replaceVariables(`{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "{{title}} API",
+    "description": "{{description}}",
+    "version": "{{version}}",
+    "contact": {
+      "email": "{{contactEmail}}"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "{{serverUrl}}/api/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "{{serverUrl}}/api/v2",
+      "description": "Version 2 API"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {"type": "string"},
+                  "password": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {"type": "string"},
+                    "expires": {"type": "string"}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all users",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/config": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get system configuration",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "System configuration"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "username": {"type": "string"},
+          "email": {"type": "string"},
+          "role": {"type": "string"}
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}`);
+	}
+
+	getContentType(): string {
+		return 'application/json';
+	}
+
+	getDescription(): string {
+		return 'API documentation (OpenAPI/Swagger)';
+	}
+}
+
+export class DockerfileGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			baseImage: this.getRandomItem(['node:18-alpine', 'python:3.11-slim', 'nginx:alpine', 'php:8.2-fpm']),
+			workDir: '/app',
+			port: this.getRandomItem(['3000', '8000', '8080', '80']),
+			user: this.getRandomItem(['node', 'www-data', 'app']),
+			packageManager: this.getRandomItem(['npm', 'yarn', 'pnpm']),
+		};
+	}
+
+	generate(): string {
+		return this.replaceVariables(`# Production Dockerfile
+FROM {{baseImage}}
+
+# Set working directory
+WORKDIR {{workDir}}
+
+# Copy package files
+COPY package*.json ./
+COPY yarn.lock ./
+
+# Install dependencies
+RUN {{packageManager}} install --production
+
+# Copy application code
+COPY . .
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
+
+# Change ownership
+RUN chown -R nextjs:nodejs {{workDir}}
+USER nextjs
+
+# Expose port
+EXPOSE {{port}}
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\
+  CMD curl -f http://localhost:{{port}}/health || exit 1
+
+# Environment variables
+ENV NODE_ENV=production
+ENV PORT={{port}}
+
+# Start application
+CMD ["{{packageManager}}", "start"]
+
+# Docker image metadata
+LABEL maintainer="DevOps Team"
+LABEL version="1.0"
+LABEL description="Production web application"`);
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Docker configuration file';
+	}
+}
+
+export class KubernetesConfigGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			appName: this.context.companyName?.toLowerCase() || 'webapp',
+			namespace: 'production',
+			replicas: this.getRandomItem(['2', '3', '5']),
+			image: `${this.context.companyDomain || 'registry.example.com'}/webapp:latest`,
+			port: this.getRandomItem(['3000', '8000', '8080']),
+			cpu: this.getRandomItem(['100m', '200m', '500m']),
+			memory: this.getRandomItem(['128Mi', '256Mi', '512Mi']),
+		};
+	}
+
+	generate(): string {
+		return this.replaceVariables(`apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{appName}}-deployment
+  namespace: {{namespace}}
+  labels:
+    app: {{appName}}
+spec:
+  replicas: {{replicas}}
+  selector:
+    matchLabels:
+      app: {{appName}}
+  template:
+    metadata:
+      labels:
+        app: {{appName}}
+    spec:
+      containers:
+      - name: {{appName}}
+        image: {{image}}
+        ports:
+        - containerPort: {{port}}
+        resources:
+          requests:
+            memory: "{{memory}}"
+            cpu: "{{cpu}}"
+          limits:
+            memory: "{{memory}}"
+            cpu: "{{cpu}}"
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "{{port}}"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{appName}}-secrets
+              key: database-url
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{port}}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: {{port}}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{appName}}-service
+  namespace: {{namespace}}
+spec:
+  selector:
+    app: {{appName}}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{port}}
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{appName}}-secrets
+  namespace: {{namespace}}
+type: Opaque
+data:
+  database-url: cG9zdGdyZXNxbDovL3VzZXI6cGFzc3dvcmRAaG9zdDpwb3J0L2RhdGFiYXNl`);
+	}
+
+	getContentType(): string {
+		return 'application/x-yaml';
+	}
+
+	getDescription(): string {
+		return 'Kubernetes deployment configuration';
+	}
+}
+
+export class AwsConfigGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			region: this.getRandomItem(['us-east-1', 'us-west-2', 'eu-west-1', 'ap-southeast-1']),
+			accessKey: this.generateRandomKey(20),
+			secretKey: this.generateRandomKey(40),
+			bucketName: `${this.context.companyDomain?.replace(/\./g, '-') || 'company'}-assets`,
+			functionName: `${this.context.companyName?.toLowerCase() || 'app'}-lambda`,
+			runtime: this.getRandomItem(['nodejs18.x', 'python3.11', 'java17']),
+		};
+	}
+
+	generate(): string {
+		return this.replaceVariables(`# AWS Configuration File
+[default]
+region = {{region}}
+aws_access_key_id = AKIA{{accessKey}}
+aws_secret_access_key = {{secretKey}}
+output = json
+
+[profile production]
+region = {{region}}
+aws_access_key_id = AKIA{{accessKey}}
+aws_secret_access_key = {{secretKey}}
+role_arn = arn:aws:iam::123456789012:role/ProductionRole
+source_profile = default
+
+# Serverless Framework Configuration
+service: {{functionName}}
+
+provider:
+  name: aws
+  runtime: {{runtime}}
+  region: {{region}}
+  stage: prod
+  environment:
+    BUCKET_NAME: {{bucketName}}
+    REGION: {{region}}
+
+functions:
+  api:
+    handler: handler.main
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+
+resources:
+  Resources:
+    S3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: {{bucketName}}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true`);
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'AWS configuration file';
+	}
+}
+
+export class RobotsTxtGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			domain: this.context.companyDomain || 'example.com',
+			adminPath: this.getRandomItem(['/admin', '/administrator', '/wp-admin', '/panel']),
+			backupPath: this.getRandomItem(['/backup', '/backups', '/old', '/archive']),
+			apiPath: this.getRandomItem(['/api', '/api/v1', '/graphql']),
+		};
+	}
+
+	generate(): string {
+		return this.replaceVariables(`User-agent: *
+Disallow: {{adminPath}}/
+Disallow: {{backupPath}}/
+Disallow: {{apiPath}}/
+Disallow: /private/
+Disallow: /temp/
+Disallow: /tmp/
+Disallow: /.git/
+Disallow: /.env
+Disallow: /config/
+Disallow: /database/
+Disallow: /logs/
+
+# Allow specific bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap location
+Sitemap: https://{{domain}}/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 10
+
+# Blocked paths (common vulnerabilities)
+Disallow: /phpmyadmin/
+Disallow: /wp-config.php
+Disallow: /.htaccess
+Disallow: /composer.json
+Disallow: /package.json`);
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Robots.txt file';
+	}
+}
+
+export class SecurityTxtGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			domain: this.context.companyDomain || 'example.com',
+			securityEmail: this.context.adminEmail || 'security@example.com',
+			expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+			companyName: this.context.companyName || 'Example Corp',
+		};
+	}
+
+	generate(): string {
+		return this.replaceVariables(`Contact: mailto:{{securityEmail}}
+Contact: https://{{domain}}/security
+Expires: {{expires}}
+Acknowledgments: https://{{domain}}/security/acknowledgments
+Preferred-Languages: en
+Canonical: https://{{domain}}/.well-known/security.txt
+Policy: https://{{domain}}/security/policy
+Hiring: https://{{domain}}/careers
+
+# Security Policy for {{companyName}}
+#
+# We take security seriously. If you discover any security-related
+# issues, please report them responsibly.
+#
+# Scope: *.{{domain}}
+# Out of scope: Third-party services, social engineering
+#
+# Reward: We offer recognition and rewards for valid reports`);
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Security.txt file';
 	}
 }
