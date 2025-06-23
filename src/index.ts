@@ -29,6 +29,18 @@ export default {
 		const path = url.pathname;
 		const method = request.method;
 
+		// Serve static files for root path or legitimate requests
+		if (path === '/' || path === '/index.html') {
+			try {
+				const asset = await env.ASSETS.fetch(new URL('/index.html', request.url));
+				if (asset.status === 200) {
+					return asset;
+				}
+			} catch (error) {
+				console.log('Static asset not found, falling through to honeypot logic');
+			}
+		}
+
 		// Handle POST requests with random errors
 		if (method === 'POST') {
 			return await generateRandomErrorResponse(request, env);

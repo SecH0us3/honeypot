@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Honeypot - Cloudflare Worker Security Project</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            background: #ecf0f1;
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .tech-tag {
+            background: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .warning {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍯 Honeypot - Cloudflare Worker</h1>
+
+        <div class="highlight">
+            <strong>Project Purpose:</strong> Creating an intelligent trap for attackers that mimics vulnerable files and configurations, tracks attack attempts, and provides realistic fake data.
+        </div>
+
+        <h2>📋 Key Features</h2>
+        <ul class="feature-list">
+            <li><strong>Scanner Detection:</strong> Automatic identification of scanning tools via User-Agent</li>
+            <li><strong>Vulnerability Simulation:</strong> Generate fake content for popular attack targets</li>
+            <li><strong>Attack Monitoring:</strong> Log all suspicious requests with detailed information</li>
+            <li><strong>Webhook Notifications:</strong> Real-time attack attempt notifications</li>
+            <li><strong>Realistic Responses:</strong> Random delays and headers for authenticity</li>
+            <li><strong>Multiple Formats:</strong> Support for HTML, JSON, XML and other response formats</li>
+        </ul>
+
+        <h2>🎯 Types of Simulated Vulnerabilities</h2>
+        <ul>
+            <li><strong>Git Files:</strong> <code>.git/config</code>, <code>.git/HEAD</code></li>
+            <li><strong>Admin Panels:</strong> <code>/admin</code>, <code>/phpmyadmin</code></li>
+            <li><strong>CMS Vulnerabilities:</strong> WordPress, Drupal configurations</li>
+            <li><strong>Backup Files:</strong> <code>.bak</code>, <code>.backup</code>, <code>.old</code></li>
+            <li><strong>Databases:</strong> <code>.sql</code>, <code>.db</code>, dumps</li>
+            <li><strong>Configuration Files:</strong> <code>.env</code>, <code>config.php</code>, <code>wp-config.php</code></li>
+            <li><strong>Cloud Configurations:</strong> AWS, Docker, Kubernetes files</li>
+            <li><strong>API Documentation:</strong> Swagger, OpenAPI specifications</li>
+        </ul>
+
+        <h2>🔧 Technology Stack</h2>
+        <div class="tech-stack">
+            <span class="tech-tag">TypeScript</span>
+            <span class="tech-tag">Cloudflare Workers</span>
+            <span class="tech-tag">Serverless</span>
+            <span class="tech-tag">Edge Computing</span>
+            <span class="tech-tag">Security</span>
+            <span class="tech-tag">Monitoring</span>
+        </div>
+
+        <h2>⚙️ Key Advantages</h2>
+        <ul>
+            <li><strong>Performance:</strong> Runs on Cloudflare's edge network</li>
+            <li><strong>Scalability:</strong> Automatic scaling without servers</li>
+            <li><strong>Intelligence:</strong> Adaptive responses based on request type</li>
+            <li><strong>Security:</strong> Isolation and protection from attacks</li>
+            <li><strong>Analytics:</strong> Detailed logging and monitoring</li>
+        </ul>
+
+        <h2>📊 Monitoring & Analytics</h2>
+        <ul>
+            <li>Track attacker IP addresses</li>
+            <li>Analyze User-Agent strings and scanning tools</li>
+            <li>Geographic distribution of attacks</li>
+            <li>Statistics by vulnerability types</li>
+            <li>Integration with notification systems</li>
+        </ul>
+
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> This project is intended for educational purposes and protection of your own resources only. Use responsibly and in accordance with applicable laws.
+        </div>
+
+        <h2>🚀 Deployment</h2>
+        <p>The project is configured for deployment on Cloudflare Workers using Wrangler CLI. Supports environment variables for behavior configuration and integration with external systems.</p>
+
+        <div class="footer">
+            <p>Developed to enhance web application security<br>
+            <small>Use with caution and in accordance with ethical principles</small></p>
+        </div>
+    </div>
+</body>
+</html>

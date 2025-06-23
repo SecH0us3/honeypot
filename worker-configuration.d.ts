@@ -16,6 +16,7 @@ interface Env extends Cloudflare.Env {
 	MIN_RESPONSE_DELAY?: string;
 	MAX_RESPONSE_DELAY?: string;
 	VERBOSE_LOGGING?: string;
+	ASSETS: Fetcher;
 }
 
 // Begin runtime types
