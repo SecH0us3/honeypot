@@ -4,6 +4,14 @@ import { GitConfigGenerator, GitHeadGenerator, GitRefGenerator, GitIndexGenerato
 import { AdminPanelGenerator, PhpMyAdminGenerator } from './templateGenerators/adminGenerator';
 import { WordPressLoginGenerator } from './templateGenerators/wordpressGenerator';
 import { BackupFileGenerator, DatabaseFileGenerator, EnvironmentFileGenerator } from './templateGenerators/fileGenerators';
+import {
+	PhpInfoGenerator,
+	ComposerJsonGenerator,
+	PackageJsonGenerator,
+	HtaccessGenerator,
+	WebConfigGenerator,
+} from './templateGenerators/specializedGenerators';
+import { RandomScannerResponseGenerator, EnhancedScannerResponseGenerator, ScannerDetector } from './templateGenerators/scannerDetector';
 import { TemplateGenerator, RandomDataContext } from './templateGenerators/types';
 
 export interface HoneypotRule {
@@ -13,6 +21,13 @@ export interface HoneypotRule {
 }
 
 export const HONEYPOT_RULES: HoneypotRule[] = [
+	// User-Agent based scanner detection (highest priority)
+	{
+		pattern: '.*', // Matches any path
+		generatorClass: EnhancedScannerResponseGenerator,
+		description: 'Scanner detection based on User-Agent',
+	},
+
 	// Git files
 	{
 		pattern: '\\.git/config$',
@@ -103,12 +118,12 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 	},
 	{
 		pattern: '\\.htaccess$',
-		generatorClass: EnvironmentFileGenerator,
+		generatorClass: HtaccessGenerator,
 		description: 'Apache configuration file',
 	},
 	{
 		pattern: 'web\\.config$',
-		generatorClass: EnvironmentFileGenerator,
+		generatorClass: WebConfigGenerator,
 		description: 'IIS configuration file',
 	},
 
@@ -142,12 +157,12 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 	// Development files
 	{
 		pattern: 'composer\\.json$',
-		generatorClass: EnvironmentFileGenerator,
+		generatorClass: ComposerJsonGenerator,
 		description: 'Composer configuration',
 	},
 	{
 		pattern: 'package\\.json$',
-		generatorClass: EnvironmentFileGenerator,
+		generatorClass: PackageJsonGenerator,
 		description: 'NPM package configuration',
 	},
 	{
@@ -164,12 +179,12 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 	// Server info files
 	{
 		pattern: 'phpinfo\\.php$',
-		generatorClass: AdminPanelGenerator,
+		generatorClass: PhpInfoGenerator,
 		description: 'PHP info page',
 	},
 	{
 		pattern: 'info\\.php$',
-		generatorClass: AdminPanelGenerator,
+		generatorClass: PhpInfoGenerator,
 		description: 'Server info page',
 	},
 	{
@@ -221,4 +236,24 @@ export function createGenerator(
 	};
 
 	return new generatorClass(context);
+}
+
+// Helper function to match request against rules
+export function matchRule(url: string, userAgent: string): HoneypotRule | null {
+	for (const rule of HONEYPOT_RULES) {
+		// Special handling for scanner detection rule
+		if (rule.generatorClass === EnhancedScannerResponseGenerator) {
+			if (ScannerDetector.isScannerUserAgent(userAgent)) {
+				return rule;
+			}
+			continue; // Skip this rule if not a scanner
+		}
+
+		// Regular pattern matching
+		const regex = new RegExp(rule.pattern);
+		if (regex.test(url)) {
+			return rule;
+		}
+	}
+	return null;
 }

@@ -3,7 +3,7 @@
  * Designed to deceive attackers by serving fake content for common attack vectors
  */
 
-import { HONEYPOT_RULES, createGenerator, HoneypotRule } from './config';
+import { HONEYPOT_RULES, createGenerator, matchRule, HoneypotRule } from './config';
 
 // Environment variable helpers
 function getEnvBool(env: any, key: string, defaultValue: boolean = false): boolean {
@@ -35,12 +35,12 @@ export default {
 		}
 
 		// Check if the request matches any honeypot patterns
-		const matchedRule = findMatchingRule(path);
+		const userAgent = request.headers.get('User-Agent') || '';
+		const matchedRule = matchRule(path, userAgent);
 
 		if (matchedRule) {
 			// Log the suspicious request
 			const clientIp = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || 'unknown';
-			const userAgent = request.headers.get('User-Agent') || 'unknown';
 			const timestamp = new Date().toISOString();
 
 			console.log(`Honeypot triggered: ${path} from ${clientIp} - ${matchedRule.description}`);
@@ -135,19 +135,6 @@ export default {
 		return generateNotFoundResponse(path, env);
 	},
 } satisfies ExportedHandler<Env>;
-
-/**
- * Find the first honeypot rule that matches the given path
- */
-function findMatchingRule(path: string): HoneypotRule | null {
-	for (const rule of HONEYPOT_RULES) {
-		const regex = new RegExp(rule.pattern, 'i');
-		if (regex.test(path)) {
-			return rule;
-		}
-	}
-	return null;
-}
 
 /**
  * Send webhook notification for honeypot triggers

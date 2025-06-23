@@ -4,7 +4,19 @@
 declare namespace Cloudflare {
 	interface Env {}
 }
-interface Env extends Cloudflare.Env {}
+interface Env extends Cloudflare.Env {
+	WEBHOOK_URL?: string;
+	SERVER_HEADER?: string;
+	POWERED_BY_HEADER?: string;
+	COMPANY_NAME?: string;
+	COMPANY_DOMAIN?: string;
+	ADMIN_EMAIL?: string;
+	TIMEZONE?: string;
+	LOCALE?: string;
+	MIN_RESPONSE_DELAY?: string;
+	MAX_RESPONSE_DELAY?: string;
+	VERBOSE_LOGGING?: string;
+}
 
 // Begin runtime types
 /*! *****************************************************************************
