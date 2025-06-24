@@ -2,6 +2,54 @@
 
 A sophisticated honeypot application built for Cloudflare Workers that deceives attackers by serving realistic fake content for common attack vectors.
 
+## 🧪 Quick Demo
+
+Want to see the honeypot in action? Try these live examples (if deployed):
+
+**Git Repository Files:**
+- [/.git/config](/.git/config) - Git configuration with fake repository info
+- [/.git/HEAD](/.git/HEAD) - Current branch reference
+- [/.git/refs/heads/main](/.git/refs/heads/main) - Main branch commit hash
+
+**Admin Panels:**
+- [/admin/](/admin/) - Generic admin login page
+- [/phpmyadmin/](/phpmyadmin/) - Database administration interface
+- [/wp-admin/](/wp-admin/) - WordPress admin panel
+
+**Configuration Files:**
+- [/.env](/.env) - Environment variables with API keys
+- [/config.php](/config.php) - PHP application configuration
+- [/wp-config.php](/wp-config.php) - WordPress database configuration
+
+**Backup & Database Files:**
+- [/backup.sql](/backup.sql) - SQL database dump
+- [/database.bak](/database.bak) - Database backup file
+- [/users.csv](/users.csv) - User data export
+
+> **Note:** All data shown is completely fake and generated dynamically. Click any link to see realistic content that would fool attackers, but contains no real secrets!
+
+📄 **[View Interactive Demo Page](static/index.html)** - Complete overview with all features and live examples
+
+🔧 **[See Demo Examples & Testing Commands](DEMO_EXAMPLES.md)** - cURL commands, scripts, and testing scenarios
+
+## What is a Honeypot
+
+A Honeypot is a security system that mimics vulnerable systems or files to attract and detect attackers. This project represents an intelligent trap that:
+
+- **Simulates Vulnerabilities**: Creates realistic fake configuration files, admin panels, and other popular attack targets
+- **Detects Attacks**: Automatically identifies scanning tools and malicious activity
+- **Logs Activity**: Records all suspicious requests with detailed information about attackers
+- **Threat Notifications**: Can send webhook notifications about attack attempts in real-time
+- **Slows Down Attackers**: Returns realistic but useless data, forcing them to waste time
+
+### How It Works
+
+1. **Request Reception**: Worker receives HTTP request to a suspicious path
+2. **Analysis**: System analyzes User-Agent, IP address, and requested path
+3. **Response Generation**: Creates realistic fake content (Git files, admin panels, databases)
+4. **Logging**: All attack information is saved in logs
+5. **Notification**: Optionally sends notification about attack attempt
+
 ## Features
 
 - **Git Files**: Fake `.git/config`, `.git/HEAD`, and other Git repository files
@@ -34,6 +82,8 @@ src/
 ```
 
 ## Setup
+
+> 💡 **Quick Start:** Visit the [interactive demo page](static/index.html) to see all honeypot features in action before setting up!
 
 1. **Install dependencies:**
    ```bash
@@ -231,7 +281,7 @@ npm run dev
 node test_honeypot.js
 ```
 
-The test script will:
+The test script (`test_honeypot.js`) will:
 - Test all configured GET honeypot patterns
 - Test POST requests to various endpoints
 - Verify random error generation for POST requests

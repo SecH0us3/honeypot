@@ -1,158 +1,310 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Honeypot - Cloudflare Worker Security Project</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-        }
-        h2 {
-            color: #34495e;
-            margin-top: 30px;
-        }
-        .highlight {
-            background-color: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 4px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-        .feature-list li {
-            background: #ecf0f1;
-            margin: 10px 0;
-            padding: 10px;
-            border-left: 4px solid #3498db;
-            border-radius: 4px;
-        }
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        .tech-tag {
-            background: #3498db;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .warning {
-            background-color: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
-            padding: 15px;
-            border-radius: 4px;
-            margin: 20px 0;
-        }
-        code {
-            background: #f4f4f4;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-family: 'Consolas', 'Monaco', monospace;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #666;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🍯 Honeypot - Cloudflare Worker</h1>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Honeypot - Cloudflare Worker Security Project</title>
+		<style>
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+				line-height: 1.6;
+				color: #333;
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 20px;
+				background-color: #f8f9fa;
+			}
+			.container {
+				background: white;
+				padding: 40px;
+				border-radius: 8px;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			}
+			h1 {
+				color: #2c3e50;
+				border-bottom: 3px solid #3498db;
+				padding-bottom: 10px;
+			}
+			h2 {
+				color: #34495e;
+				margin-top: 30px;
+			}
+			.highlight {
+				background-color: #fff3cd;
+				border: 1px solid #ffeaa7;
+				border-radius: 4px;
+				padding: 15px;
+				margin: 20px 0;
+			}
+			.feature-list {
+				list-style: none;
+				padding: 0;
+			}
+			.feature-list li {
+				background: #ecf0f1;
+				margin: 10px 0;
+				padding: 10px;
+				border-left: 4px solid #3498db;
+				border-radius: 4px;
+			}
+			.tech-stack {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				margin: 20px 0;
+			}
+			.tech-tag {
+				background: #3498db;
+				color: white;
+				padding: 5px 10px;
+				border-radius: 15px;
+				font-size: 12px;
+				font-weight: bold;
+			}
+			.warning {
+				background-color: #fee;
+				border: 1px solid #fcc;
+				color: #c33;
+				padding: 15px;
+				border-radius: 4px;
+				margin: 20px 0;
+			}
+			code {
+				background: #f4f4f4;
+				padding: 2px 4px;
+				border-radius: 3px;
+				font-family: 'Consolas', 'Monaco', monospace;
+			}
+			.footer {
+				text-align: center;
+				margin-top: 40px;
+				padding-top: 20px;
+				border-top: 1px solid #eee;
+				color: #666;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>🍯 Honeypot - Cloudflare Worker</h1>
 
-        <div class="highlight">
-            <strong>Project Purpose:</strong> Creating an intelligent trap for attackers that mimics vulnerable files and configurations, tracks attack attempts, and provides realistic fake data.
-        </div>
+			<div class="highlight">
+				<strong>What is a Honeypot:</strong> It's an intelligent trap for attackers that mimics vulnerable files and configurations,
+				tracks attack attempts, and provides realistic fake data. The Honeypot works as a decoy, forcing attackers to waste time
+				analyzing useless information while recording all their actions.
+			</div>
 
-        <h2>📋 Key Features</h2>
-        <ul class="feature-list">
-            <li><strong>Scanner Detection:</strong> Automatic identification of scanning tools via User-Agent</li>
-            <li><strong>Vulnerability Simulation:</strong> Generate fake content for popular attack targets</li>
-            <li><strong>Attack Monitoring:</strong> Log all suspicious requests with detailed information</li>
-            <li><strong>Webhook Notifications:</strong> Real-time attack attempt notifications</li>
-            <li><strong>Realistic Responses:</strong> Random delays and headers for authenticity</li>
-            <li><strong>Multiple Formats:</strong> Support for HTML, JSON, XML and other response formats</li>
-        </ul>
+			<h2>🔄 How It Works</h2>
+			<ul class="feature-list">
+				<li><strong>1. Request Interception:</strong> Worker analyzes all incoming HTTP requests to suspicious paths</li>
+				<li><strong>2. Threat Detection:</strong> Automatic identification of scanners by User-Agent and behavior</li>
+				<li><strong>3. Trap Generation:</strong> Creating realistic fake content for each type of attack</li>
+				<li><strong>4. Attack Logging:</strong> Recording all suspicious requests with detailed information</li>
+				<li><strong>5. Notifications:</strong> Sending webhook notifications about attack attempts in real-time</li>
+				<li><strong>6. Slowing Down Attackers:</strong> Random delays and realistic headers for authenticity</li>
+			</ul>
 
-        <h2>🎯 Types of Simulated Vulnerabilities</h2>
-        <ul>
-            <li><strong>Git Files:</strong> <code>.git/config</code>, <code>.git/HEAD</code></li>
-            <li><strong>Admin Panels:</strong> <code>/admin</code>, <code>/phpmyadmin</code></li>
-            <li><strong>CMS Vulnerabilities:</strong> WordPress, Drupal configurations</li>
-            <li><strong>Backup Files:</strong> <code>.bak</code>, <code>.backup</code>, <code>.old</code></li>
-            <li><strong>Databases:</strong> <code>.sql</code>, <code>.db</code>, dumps</li>
-            <li><strong>Configuration Files:</strong> <code>.env</code>, <code>config.php</code>, <code>wp-config.php</code></li>
-            <li><strong>Cloud Configurations:</strong> AWS, Docker, Kubernetes files</li>
-            <li><strong>API Documentation:</strong> Swagger, OpenAPI specifications</li>
-        </ul>
+			<h2>📋 Key Features</h2>
+			<ul class="feature-list">
+				<li><strong>Scanner Detection:</strong> Automatic identification of scanning tools via User-Agent</li>
+				<li><strong>Vulnerability Simulation:</strong> Generate fake content for popular attack targets</li>
+				<li><strong>Attack Monitoring:</strong> Log all suspicious requests with detailed information</li>
+				<li><strong>Webhook Notifications:</strong> Real-time attack attempt notifications</li>
+				<li><strong>Realistic Responses:</strong> Random delays and headers for authenticity</li>
+				<li><strong>Multiple Formats:</strong> Support for HTML, JSON, XML and other response formats</li>
+			</ul>
 
-        <h2>🔧 Technology Stack</h2>
-        <div class="tech-stack">
-            <span class="tech-tag">TypeScript</span>
-            <span class="tech-tag">Cloudflare Workers</span>
-            <span class="tech-tag">Serverless</span>
-            <span class="tech-tag">Edge Computing</span>
-            <span class="tech-tag">Security</span>
-            <span class="tech-tag">Monitoring</span>
-        </div>
+			<h2>🎯 Types of Simulated Vulnerabilities</h2>
+			<ul>
+				<li>
+					<strong>Git Repositories:</strong> <code>.git/config</code>, <code>.git/HEAD</code> - simulation of exposed repositories
+					with confidential information
+				</li>
+				<li><strong>Admin Panels:</strong> <code>/admin</code>, <code>/phpmyadmin</code> - fake administration interfaces</li>
+				<li><strong>CMS Vulnerabilities:</strong> WordPress, Drupal configurations - content management files</li>
+				<li>
+					<strong>Backup Files:</strong> <code>.bak</code>, <code>.backup</code>, <code>.old</code> - "forgotten" backups with
+					data
+				</li>
+				<li><strong>Databases:</strong> <code>.sql</code>, <code>.db</code>, dumps - database exports</li>
+				<li>
+					<strong>Configuration Files:</strong> <code>.env</code>, <code>config.php</code>, <code>wp-config.php</code> -
+					application settings
+				</li>
+				<li><strong>Cloud Configurations:</strong> AWS, Docker, Kubernetes files - infrastructure settings</li>
+				<li><strong>API Documentation:</strong> Swagger, OpenAPI specifications - API endpoint descriptions</li>
+			</ul>
 
-        <h2>⚙️ Key Advantages</h2>
-        <ul>
-            <li><strong>Performance:</strong> Runs on Cloudflare's edge network</li>
-            <li><strong>Scalability:</strong> Automatic scaling without servers</li>
-            <li><strong>Intelligence:</strong> Adaptive responses based on request type</li>
-            <li><strong>Security:</strong> Isolation and protection from attacks</li>
-            <li><strong>Analytics:</strong> Detailed logging and monitoring</li>
-        </ul>
+			<h2>🔧 Technology Stack</h2>
+			<div class="tech-stack">
+				<span class="tech-tag">TypeScript</span>
+				<span class="tech-tag">Cloudflare Workers</span>
+				<span class="tech-tag">Serverless</span>
+				<span class="tech-tag">Edge Computing</span>
+				<span class="tech-tag">Security</span>
+				<span class="tech-tag">Monitoring</span>
+			</div>
 
-        <h2>📊 Monitoring & Analytics</h2>
-        <ul>
-            <li>Track attacker IP addresses</li>
-            <li>Analyze User-Agent strings and scanning tools</li>
-            <li>Geographic distribution of attacks</li>
-            <li>Statistics by vulnerability types</li>
-            <li>Integration with notification systems</li>
-        </ul>
+			<h2>⚙️ Key Advantages</h2>
+			<ul>
+				<li><strong>Performance:</strong> Runs on Cloudflare's edge network worldwide</li>
+				<li><strong>Scalability:</strong> Automatic scaling without servers</li>
+				<li><strong>Intelligence:</strong> Adaptive responses based on request type and attacker</li>
+				<li><strong>Security:</strong> Isolation and protection from attacks at infrastructure level</li>
+				<li><strong>Analytics:</strong> Detailed logging and monitoring of all attack attempts</li>
+				<li><strong>Cost-Effective:</strong> Serverless architecture - pay only for usage</li>
+			</ul>
 
-        <div class="warning">
-            <strong>⚠️ Warning:</strong> This project is intended for educational purposes and protection of your own resources only. Use responsibly and in accordance with applicable laws.
-        </div>
+			<h2>📊 Monitoring & Analytics</h2>
+			<ul>
+				<li><strong>Attacker Tracking:</strong> IP addresses, geolocation and temporal patterns</li>
+				<li><strong>Tool Analysis:</strong> User-Agent strings and scanner type identification</li>
+				<li><strong>Attack Geography:</strong> Map of attack attempt distribution by countries</li>
+				<li><strong>Vulnerability Statistics:</strong> Which types of traps trigger most often</li>
+				<li><strong>System Integration:</strong> Webhook notifications to Slack, Discord, Telegram</li>
+				<li><strong>Temporal Analysis:</strong> Activity peaks and correlation with known attacks</li>
+			</ul>
 
-        <h2>🚀 Deployment</h2>
-        <p>The project is configured for deployment on Cloudflare Workers using Wrangler CLI. Supports environment variables for behavior configuration and integration with external systems.</p>
+			<div class="warning">
+				<strong>⚠️ Warning:</strong> This project is intended solely for educational purposes and protection of your own resources.
+				Use responsibly and in accordance with applicable laws. Do not use to disrupt other people's systems.
+			</div>
 
-        <div class="footer">
-            <p>Developed to enhance web application security<br>
-            <small>Use with caution and in accordance with ethical principles</small></p>
-        </div>
-    </div>
-</body>
+			<h2>🧪 Try It Out - Demo Links</h2>
+			<p>
+				<strong>Experience the honeypot in action!</strong> Click the links below to see how different attack vectors trigger our
+				security traps. Each link will show you realistic fake content that would fool attackers:
+			</p>
+
+			<div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0">
+				<h3 style="margin-top: 0; color: #e74c3c">🎯 Git Repository Files</h3>
+				<p>Exposed Git files that attackers often target for source code and secrets:</p>
+				<ul>
+					<li>
+						<a href="/.git/config" target="_blank"><code>/.git/config</code></a> - Git configuration with fake repository info
+					</li>
+					<li>
+						<a href="/.git/HEAD" target="_blank"><code>/.git/HEAD</code></a> - Current branch reference
+					</li>
+					<li>
+						<a href="/.git/refs/heads/main" target="_blank"><code>/.git/refs/heads/main</code></a> - Main branch commit hash
+					</li>
+				</ul>
+
+				<h3 style="color: #e74c3c">🔐 Admin Panels</h3>
+				<p>Fake administrative interfaces that look convincingly real:</p>
+				<ul>
+					<li>
+						<a href="/admin/" target="_blank"><code>/admin/</code></a> - Generic admin login page
+					</li>
+					<li>
+						<a href="/phpmyadmin/" target="_blank"><code>/phpmyadmin/</code></a> - Database administration interface
+					</li>
+					<li>
+						<a href="/wp-admin/" target="_blank"><code>/wp-admin/</code></a> - WordPress admin panel
+					</li>
+				</ul>
+
+				<h3 style="color: #e74c3c">📄 Configuration Files</h3>
+				<p>Sensitive configuration files that contain "secrets":</p>
+				<ul>
+					<li>
+						<a href="/.env" target="_blank"><code>/.env</code></a> - Environment variables with API keys
+					</li>
+					<li>
+						<a href="/config.php" target="_blank"><code>config.php</code></a> - PHP application configuration
+					</li>
+					<li>
+						<a href="/wp-config.php" target="_blank"><code>wp-config.php</code></a> - WordPress database configuration
+					</li>
+				</ul>
+
+				<h3 style="color: #e74c3c">💾 Backup & Database Files</h3>
+				<p>Database dumps and backup files with fake sensitive data:</p>
+				<ul>
+					<li>
+						<a href="/backup.sql" target="_blank"><code>/backup.sql</code></a> - SQL database dump
+					</li>
+					<li>
+						<a href="/database.bak" target="_blank"><code>/database.bak</code></a> - Database backup file
+					</li>
+					<li>
+						<a href="/users.csv" target="_blank"><code>/users.csv</code></a> - User data export
+					</li>
+				</ul>
+
+				<h3 style="color: #e74c3c">🔧 Development Files</h3>
+				<p>Development and dependency files:</p>
+				<ul>
+					<li>
+						<a href="/composer.json" target="_blank"><code>/composer.json</code></a> - PHP dependency file
+					</li>
+					<li>
+						<a href="/package.json" target="_blank"><code>/package.json</code></a> - Node.js project file
+					</li>
+					<li>
+						<a href="/.htaccess" target="_blank"><code>/.htaccess</code></a> - Apache configuration
+					</li>
+				</ul>
+			</div>
+
+			<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0">
+				<strong>💡 What You'll See:</strong> Each link above will show you realistic fake content that includes:
+				<ul style="margin: 10px 0">
+					<li>Convincing file formats and structures</li>
+					<li>Realistic fake data (usernames, passwords, API keys, etc.)</li>
+					<li>Proper MIME types and headers</li>
+					<li>Random variations to avoid detection patterns</li>
+				</ul>
+				<strong>Note:</strong> All data is completely fake and generated dynamically. No real secrets are exposed!
+			</div>
+
+			<div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0">
+				<h3 style="margin-top: 0; color: #2e7d32">🔍 What Happens Behind the Scenes</h3>
+				<p>When you click any of the demo links above, here's what the honeypot system does:</p>
+				<ol style="margin: 15px 0; padding-left: 20px">
+					<li><strong>Request Analysis:</strong> Analyzes your User-Agent, IP address, and requested path</li>
+					<li><strong>Pattern Matching:</strong> Identifies which type of attack vector is being attempted</li>
+					<li><strong>Content Generation:</strong> Creates realistic fake content using randomized templates</li>
+					<li><strong>Logging:</strong> Records the attempt with timestamp and client information</li>
+					<li><strong>Response Delivery:</strong> Serves the fake content with authentic headers and delays</li>
+				</ol>
+				<p style="margin-top: 15px">
+					<strong>💡 Pro Tip:</strong> Check your browser's developer tools (F12) to see the realistic HTTP headers and response
+					times that make this honeypot so convincing!
+				</p>
+			</div>
+
+			<div style="background: #f0f8ff; border: 1px solid #2196f3; padding: 15px; border-radius: 4px; margin: 20px 0">
+				<strong>🎮 Interactive Challenge:</strong>
+				<p style="margin: 10px 0">
+					Try accessing the same URL multiple times - you'll notice the content changes slightly each time! This variation helps
+					avoid detection by automated tools and makes the honeypot more convincing.
+				</p>
+				<p style="margin: 10px 0">
+					<strong>Example:</strong> Visit <a href="/.git/config" target="_blank">/.git/config</a> several times and compare the
+					generated repository names, user emails, and commit hashes.
+				</p>
+			</div>
+
+			<h2>🚀 Deployment & Testing</h2>
+			<p>
+				The project is configured for deployment on Cloudflare Workers using Wrangler CLI. Supports environment variables for
+				behavior configuration and integration with external systems.
+			</p>
+
+			<p>
+				<strong>Testing:</strong> The project includes comprehensive tests (<code>test_honeypot.js</code> and
+				<code>test_post.js</code>) to verify all types of traps, POST requests, and random error generation. Tests help ensure that
+				all honeypot components work correctly.
+			</p>
+
+			<div class="footer">
+				<p>
+					Developed to enhance web application security<br />
+					<small>Use with caution and in accordance with ethical principles</small>
+				</p>
+			</div>
+		</div>
+	</body>
 </html>
