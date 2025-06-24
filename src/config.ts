@@ -22,6 +22,12 @@ import {
 	AwsConfigGenerator,
 	RobotsTxtGenerator,
 	SecurityTxtGenerator,
+	YarnLockGenerator,
+	ComposerLockGenerator,
+	DockerIgnoreGenerator,
+	GitIgnoreGenerator,
+	LogFileGenerator,
+	ArchiveFileGenerator,
 } from './templateGenerators/specializedGenerators';
 import { RandomScannerResponseGenerator, EnhancedScannerResponseGenerator, ScannerDetector } from './templateGenerators/scannerDetector';
 import { TemplateGenerator, RandomDataContext } from './templateGenerators/types';
@@ -172,12 +178,12 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 	},
 	{
 		pattern: 'yarn\\.lock$',
-		generatorClass: BackupFileGenerator,
+		generatorClass: YarnLockGenerator,
 		description: 'Yarn lock file',
 	},
 	{
 		pattern: 'composer\\.lock$',
-		generatorClass: BackupFileGenerator,
+		generatorClass: ComposerLockGenerator,
 		description: 'Composer lock file',
 	},
 
@@ -201,24 +207,24 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 	// Logs and debug files
 	{
 		pattern: '\\.(log|debug|trace)$',
-		generatorClass: BackupFileGenerator,
+		generatorClass: LogFileGenerator,
 		description: 'Log file',
 	},
 	{
 		pattern: 'error_log$',
-		generatorClass: BackupFileGenerator,
+		generatorClass: LogFileGenerator,
 		description: 'Error log file',
 	},
 	{
 		pattern: 'access_log$',
-		generatorClass: BackupFileGenerator,
+		generatorClass: LogFileGenerator,
 		description: 'Access log file',
 	},
 
 	// Archives and compressed files
 	{
 		pattern: '\\.(zip|tar|gz|rar|7z)$',
-		generatorClass: BackupFileGenerator,
+		generatorClass: ArchiveFileGenerator,
 		description: 'Archive file',
 	},
 
@@ -284,7 +290,7 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 	},
 	{
 		pattern: '\\.dockerignore$',
-		generatorClass: BackupFileGenerator,
+		generatorClass: DockerIgnoreGenerator,
 		description: 'Docker ignore file',
 	},
 	{
@@ -369,6 +375,11 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 		pattern: '\\.vscode/(settings|launch)\\.json$',
 		generatorClass: PackageJsonGenerator,
 		description: 'VS Code configuration',
+	},
+	{
+		pattern: '\\.gitignore$',
+		generatorClass: GitIgnoreGenerator,
+		description: 'Git ignore file',
 	},
 	{
 		pattern: '\\.idea/.*$',

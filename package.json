@@ -11,6 +11,7 @@
 		"test:honeypot": "node test_honeypot.js",
 		"test:post": "node test_post.js",
 		"test:full": "npm run test:honeypot && npm run test:post",
+		"test:generators": "node test_new_generators.js",
 		"logs": "wrangler tail",
 		"logs:pretty": "wrangler tail --format pretty",
 		"logs:json": "wrangler tail --format json",

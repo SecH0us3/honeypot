@@ -488,132 +488,280 @@ export class WebConfigGenerator extends BaseTemplateGenerator {
 export class SwaggerJsonGenerator extends BaseTemplateGenerator {
 	protected initializeVariables(): void {
 		this.variables = {
-			title: this.context.companyName || 'API',
+			title: this.context.companyName || this.getRandomItem(['CoreAPI', 'DataHub', 'AuthService', 'AdminAPI', 'UserPortal']),
 			version: this.generateRandomVersion(),
-			serverUrl: `https://${this.context.companyDomain || 'api.example.com'}`,
-			contactEmail: this.context.adminEmail || 'api@example.com',
-			description: 'RESTful API documentation',
+			serverUrl: `https://${this.context.companyDomain || this.getRandomItem(['api.techcorp.com', 'services.dataflow.io', 'backend.cloudapp.net'])}`,
+			contactEmail: this.context.adminEmail || this.getRandomItem(['api@company.com', 'dev@service.io', 'support@platform.net']),
+			description: this.getRandomItem([
+				'Enterprise REST API for business operations',
+				'Microservices API gateway documentation',
+				'Internal system integration endpoints',
+				'Customer data management API',
+				'Administrative control interface',
+			]),
 		};
 	}
 
+	private generateRandomPaths(): any {
+		const pathTemplates = [
+			{
+				path: '/auth/login',
+				method: 'post',
+				tag: 'Authentication',
+				summary: 'User authentication',
+				hasAuth: false,
+			},
+			{
+				path: '/auth/refresh',
+				method: 'post',
+				tag: 'Authentication',
+				summary: 'Refresh access token',
+				hasAuth: true,
+			},
+			{
+				path: '/users',
+				method: 'get',
+				tag: 'Users',
+				summary: 'List all users',
+				hasAuth: true,
+			},
+			{
+				path: '/users/{id}',
+				method: 'get',
+				tag: 'Users',
+				summary: 'Get user by ID',
+				hasAuth: true,
+			},
+			{
+				path: '/admin/config',
+				method: 'get',
+				tag: 'Admin',
+				summary: 'System configuration',
+				hasAuth: true,
+			},
+			{
+				path: '/admin/logs',
+				method: 'get',
+				tag: 'Admin',
+				summary: 'Application logs',
+				hasAuth: true,
+			},
+			{
+				path: '/data/export',
+				method: 'post',
+				tag: 'Data',
+				summary: 'Export data dump',
+				hasAuth: true,
+			},
+			{
+				path: '/backup/create',
+				method: 'post',
+				tag: 'Backup',
+				summary: 'Create system backup',
+				hasAuth: true,
+			},
+			{
+				path: '/health',
+				method: 'get',
+				tag: 'System',
+				summary: 'Health check',
+				hasAuth: false,
+			},
+			{
+				path: '/metrics',
+				method: 'get',
+				tag: 'System',
+				summary: 'System metrics',
+				hasAuth: true,
+			},
+		];
+
+		const selectedPaths = pathTemplates.slice(0, Math.floor(Math.random() * 6) + 4);
+		const paths: any = {};
+
+		selectedPaths.forEach((pathInfo) => {
+			const pathObj: any = {};
+			pathObj[pathInfo.method] = {
+				tags: [pathInfo.tag],
+				summary: pathInfo.summary,
+				responses: {
+					'200': {
+						description: 'Successful response',
+						content: {
+							'application/json': {
+								schema: {
+									type: 'object',
+									properties: {
+										success: { type: 'boolean' },
+										data: { type: 'object' },
+										timestamp: { type: 'string' },
+									},
+								},
+							},
+						},
+					},
+					'401': {
+						description: 'Unauthorized',
+					},
+					'403': {
+						description: 'Forbidden',
+					},
+					'500': {
+						description: 'Internal server error',
+					},
+				},
+			};
+
+			if (pathInfo.hasAuth) {
+				pathObj[pathInfo.method].security = [{ bearerAuth: [] }];
+			}
+
+			if (pathInfo.method === 'post') {
+				pathObj[pathInfo.method].requestBody = {
+					required: true,
+					content: {
+						'application/json': {
+							schema: {
+								type: 'object',
+								properties: this.generateRandomProperties(),
+							},
+						},
+					},
+				};
+			}
+
+			paths[pathInfo.path] = pathObj;
+		});
+
+		return paths;
+	}
+
+	private generateRandomProperties(): any {
+		const propertyTypes = ['string', 'integer', 'boolean', 'array'];
+		const propertyNames = ['username', 'password', 'email', 'id', 'name', 'status', 'type', 'data', 'config', 'token'];
+
+		const properties: any = {};
+		const numProps = Math.floor(Math.random() * 4) + 2;
+
+		for (let i = 0; i < numProps; i++) {
+			const propName = this.getRandomItem(propertyNames);
+			const propType = this.getRandomItem(propertyTypes);
+			properties[propName] = { type: propType };
+
+			if (propType === 'array') {
+				properties[propName].items = { type: 'string' };
+			}
+		}
+
+		return properties;
+	}
+
+	private generateRandomSchemas(): any {
+		const schemas: any = {
+			User: {
+				type: 'object',
+				properties: {
+					id: { type: 'integer' },
+					username: { type: 'string' },
+					email: { type: 'string' },
+					role: { type: 'string', enum: ['admin', 'user', 'moderator'] },
+					created_at: { type: 'string', format: 'date-time' },
+					last_login: { type: 'string', format: 'date-time' },
+				},
+			},
+			Config: {
+				type: 'object',
+				properties: {
+					database_url: { type: 'string' },
+					redis_host: { type: 'string' },
+					api_key: { type: 'string' },
+					debug_mode: { type: 'boolean' },
+					max_connections: { type: 'integer' },
+				},
+			},
+		};
+
+		// Add random additional schemas
+		const additionalSchemas = ['Product', 'Order', 'Customer', 'Report', 'Backup'];
+		const randomSchema = this.getRandomItem(additionalSchemas);
+
+		schemas[randomSchema] = {
+			type: 'object',
+			properties: this.generateRandomProperties(),
+		};
+
+		return schemas;
+	}
+
 	generate(): string {
-		return this.replaceVariables(`{
-  "openapi": "3.0.3",
-  "info": {
-    "title": "{{title}} API",
-    "description": "{{description}}",
-    "version": "{{version}}",
-    "contact": {
-      "email": "{{contactEmail}}"
-    },
-    "license": {
-      "name": "MIT",
-      "url": "https://opensource.org/licenses/MIT"
-    }
-  },
-  "servers": [
-    {
-      "url": "{{serverUrl}}/api/v1",
-      "description": "Production server"
-    },
-    {
-      "url": "{{serverUrl}}/api/v2",
-      "description": "Version 2 API"
-    }
-  ],
-  "paths": {
-    "/auth/login": {
-      "post": {
-        "tags": ["Authentication"],
-        "summary": "User login",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "username": {"type": "string"},
-                  "password": {"type": "string"}
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Login successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "token": {"type": "string"},
-                    "expires": {"type": "string"}
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/users": {
-      "get": {
-        "tags": ["Users"],
-        "summary": "Get all users",
-        "security": [{"bearerAuth": []}],
-        "responses": {
-          "200": {
-            "description": "List of users",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/config": {
-      "get": {
-        "tags": ["Admin"],
-        "summary": "Get system configuration",
-        "security": [{"bearerAuth": []}],
-        "responses": {
-          "200": {
-            "description": "System configuration"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {"type": "integer"},
-          "username": {"type": "string"},
-          "email": {"type": "string"},
-          "role": {"type": "string"}
-        }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    }
-  }
-}`);
+		const apiSpec = {
+			openapi: '3.0.3',
+			info: {
+				title: `${this.variables.title} API`,
+				description: this.variables.description,
+				version: this.variables.version,
+				contact: {
+					email: this.variables.contactEmail,
+				},
+				license: {
+					name: this.getRandomItem(['MIT', 'Apache 2.0', 'GPL v3', 'Proprietary']),
+					url: 'https://opensource.org/licenses/MIT',
+				},
+			},
+			servers: [
+				{
+					url: `${this.variables.serverUrl}/api/v1`,
+					description: 'Production server',
+				},
+				{
+					url: `${this.variables.serverUrl}/api/v2`,
+					description: 'Version 2 API',
+				},
+				{
+					url: `${this.variables.serverUrl}/staging/api`,
+					description: 'Staging environment',
+				},
+			],
+			paths: this.generateRandomPaths(),
+			components: {
+				schemas: this.generateRandomSchemas(),
+				securitySchemes: {
+					bearerAuth: {
+						type: 'http',
+						scheme: 'bearer',
+						bearerFormat: 'JWT',
+					},
+					apiKey: {
+						type: 'apiKey',
+						in: 'header',
+						name: 'X-API-Key',
+					},
+					oauth2: {
+						type: 'oauth2',
+						flows: {
+							authorizationCode: {
+								authorizationUrl: `${this.variables.serverUrl}/oauth/authorize`,
+								tokenUrl: `${this.variables.serverUrl}/oauth/token`,
+								scopes: {
+									read: 'Read access',
+									write: 'Write access',
+									admin: 'Administrative access',
+								},
+							},
+						},
+					},
+				},
+			},
+			tags: [
+				{ name: 'Authentication', description: 'User authentication endpoints' },
+				{ name: 'Users', description: 'User management' },
+				{ name: 'Admin', description: 'Administrative functions' },
+				{ name: 'Data', description: 'Data operations' },
+				{ name: 'System', description: 'System utilities' },
+			],
+		};
+
+		return JSON.stringify(apiSpec, null, 2);
 	}
 
 	getContentType(): string {
@@ -950,5 +1098,534 @@ Hiring: https://{{domain}}/careers
 
 	getDescription(): string {
 		return 'Security.txt file';
+	}
+}
+
+export class YarnLockGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			yarnVersion: this.getRandomItem(['1.22.19', '3.6.4', '4.0.2']),
+			packageCount: Math.floor(Math.random() * 500) + 50,
+			timestamp: this.context.timestamp?.toISOString() || new Date().toISOString(),
+		};
+	}
+
+	generate(): string {
+		const packages = [
+			'react',
+			'vue',
+			'angular',
+			'express',
+			'lodash',
+			'axios',
+			'moment',
+			'webpack',
+			'babel-core',
+			'typescript',
+			'eslint',
+			'prettier',
+			'jest',
+			'mocha',
+			'chai',
+			'bootstrap',
+			'jquery',
+			'redux',
+			'rxjs',
+			'socket.io',
+			'cors',
+			'bcrypt',
+		];
+
+		let lockContent = `# THIS IS AN AUTOGENERATED FILE. DO NOT EDIT THIS FILE DIRECTLY.
+# yarn lockfile v1
+
+`;
+
+		for (let i = 0; i < 15; i++) {
+			const pkg = this.getRandomItem(packages);
+			const version = this.generateRandomVersion();
+			const resolved = `https://registry.yarnpkg.com/${pkg}/-/${pkg}-${version}.tgz`;
+			const integrity = `sha512-${this.generateRandomHash(64)}`;
+
+			lockContent += `"${pkg}@^${version}":
+  version "${version}"
+  resolved "${resolved}"
+  integrity ${integrity}
+  dependencies:
+    ${this.getRandomItem(packages)} "^${this.generateRandomVersion()}"
+
+`;
+		}
+
+		return lockContent;
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Yarn lock file';
+	}
+}
+
+export class ComposerLockGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {
+			phpVersion: this.getRandomItem(['7.4.0', '8.0.0', '8.1.0', '8.2.0']),
+			timestamp: this.context.timestamp?.toISOString() || new Date().toISOString(),
+		};
+	}
+
+	generate(): string {
+		const packages = [
+			'symfony/console',
+			'guzzlehttp/guzzle',
+			'monolog/monolog',
+			'doctrine/orm',
+			'twig/twig',
+			'phpunit/phpunit',
+			'laravel/framework',
+			'psr/log',
+			'illuminate/support',
+			'carbon/carbon',
+			'swiftmailer/swiftmailer',
+		];
+
+		const lockData = {
+			_readme: [
+				'This file locks the dependencies of your project to a known state',
+				'Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies',
+			],
+			'content-hash': this.generateRandomHash(32),
+			packages: packages.slice(0, 8).map((pkg) => ({
+				name: pkg,
+				version: `v${this.generateRandomVersion()}`,
+				source: {
+					type: 'git',
+					url: `https://github.com/${pkg.replace('/', '-')}.git`,
+					reference: this.generateRandomHash(40),
+				},
+				dist: {
+					type: 'zip',
+					url: `https://api.github.com/repos/${pkg.replace('/', '-')}/zipball/${this.generateRandomHash(40)}`,
+					reference: this.generateRandomHash(40),
+					shasum: this.generateRandomHash(40),
+				},
+				require: {
+					php: `>=${this.variables.phpVersion}`,
+				},
+				type: 'library',
+				autoload: {
+					'psr-4': {
+						[pkg.split('/')[1].charAt(0).toUpperCase() + pkg.split('/')[1].slice(1) + '\\']: 'src/',
+					},
+				},
+				time: this.variables.timestamp,
+			})),
+			'packages-dev': [],
+			aliases: [],
+			'minimum-stability': 'stable',
+			'stability-flags': {},
+			'prefer-stable': false,
+			'prefer-lowest': false,
+			platform: {
+				php: this.variables.phpVersion as string,
+			},
+			'platform-dev': {},
+			'plugin-api-version': '2.3.0',
+		};
+
+		return JSON.stringify(lockData, null, 2);
+	}
+
+	getContentType(): string {
+		return 'application/json';
+	}
+
+	getDescription(): string {
+		return 'Composer lock file';
+	}
+}
+
+export class DockerIgnoreGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {};
+	}
+
+	generate(): string {
+		const ignorePatterns = [
+			'# Logs',
+			'logs',
+			'*.log',
+			'npm-debug.log*',
+			'yarn-debug.log*',
+			'yarn-error.log*',
+			'',
+			'# Runtime data',
+			'pids',
+			'*.pid',
+			'*.seed',
+			'*.pid.lock',
+			'',
+			'# Directory for instrumented libs generated by jscoverage/JSCover',
+			'lib-cov',
+			'',
+			'# Coverage directory used by tools like istanbul',
+			'coverage',
+			'',
+			'# nyc test coverage',
+			'.nyc_output',
+			'',
+			'# Grunt intermediate storage',
+			'.grunt',
+			'',
+			'# node_modules',
+			'node_modules/',
+			'',
+			'# Optional npm cache directory',
+			'.npm',
+			'',
+			'# Optional REPL history',
+			'.node_repl_history',
+			'',
+			"# Output of 'npm pack'",
+			'*.tgz',
+			'',
+			'# Yarn Integrity file',
+			'.yarn-integrity',
+			'',
+			'# dotenv environment variables file',
+			'.env',
+			'.env.local',
+			'.env.development.local',
+			'.env.test.local',
+			'.env.production.local',
+			'',
+			'# IDE files',
+			'.vscode/',
+			'.idea/',
+			'*.swp',
+			'*.swo',
+			'*~',
+			'',
+			'# OS generated files',
+			'.DS_Store',
+			'.DS_Store?',
+			'._*',
+			'.Spotlight-V100',
+			'.Trashes',
+			'ehthumbs.db',
+			'Thumbs.db',
+			'',
+			'# Docker',
+			'Dockerfile*',
+			'docker-compose*',
+			'.dockerignore',
+		];
+
+		return ignorePatterns.join('\n');
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Docker ignore file';
+	}
+}
+
+export class GitIgnoreGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {};
+	}
+
+	generate(): string {
+		const frameworks = ['node', 'python', 'java', 'php', 'go'];
+		const selectedFramework = this.getRandomItem(frameworks);
+
+		let ignoreContent = `# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+`;
+
+		// Add framework-specific ignores
+		switch (selectedFramework) {
+			case 'python':
+				ignoreContent += `# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+`;
+				break;
+			case 'java':
+				ignoreContent += `# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
+# Gradle
+.gradle
+build/
+
+`;
+				break;
+			case 'php':
+				ignoreContent += `# PHP
+vendor/
+composer.phar
+composer.lock
+.env.local
+
+# Laravel
+/bootstrap/compiled.php
+/bootstrap/cache
+/public/storage
+/storage/*.key
+/vendor
+.env.backup
+
+`;
+				break;
+		}
+
+		return ignoreContent;
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Git ignore file';
+	}
+}
+
+export class LogFileGenerator extends BaseTemplateGenerator {
+	private timestamp: Date = new Date();
+
+	protected initializeVariables(): void {
+		this.timestamp = this.context.timestamp || new Date();
+		this.variables = {
+			serverName: this.context.companyDomain || 'example.com',
+			clientIp: this.context.clientIp || '192.168.1.100',
+			userAgent: this.context.userAgent || 'Mozilla/5.0 (compatible; scanner)',
+		};
+	}
+
+	generate(): string {
+		const logTypes = ['access', 'error', 'debug'];
+		const logType = this.getRandomItem(logTypes);
+
+		let logContent = '';
+		const now = this.timestamp;
+
+		// Generate 20-50 log entries
+		const numEntries = Math.floor(Math.random() * 30) + 20;
+
+		for (let i = 0; i < numEntries; i++) {
+			const entryTime = new Date(now.getTime() - i * 60000); // 1 minute intervals
+			const timeString = entryTime.toISOString().replace('T', ' ').substring(0, 19);
+
+			switch (logType) {
+				case 'access':
+					const methods = ['GET', 'POST', 'PUT', 'DELETE'];
+					const paths = ['/admin', '/login', '/api/users', '/wp-admin', '/.env', '/config.php'];
+					const statuses = ['200', '404', '401', '403', '500'];
+					const sizes = [Math.floor(Math.random() * 10000) + 100];
+
+					logContent += `${this.variables.clientIp} - - [${timeString}] "${this.getRandomItem(methods)} ${this.getRandomItem(paths)} HTTP/1.1" ${this.getRandomItem(statuses)} ${sizes[0]} "-" "${this.variables.userAgent}"\n`;
+					break;
+
+				case 'error':
+					const errorLevels = ['ERROR', 'WARNING', 'CRITICAL', 'NOTICE'];
+					const errorMessages = [
+						'File not found',
+						'Access denied',
+						'Database connection failed',
+						'Memory limit exceeded',
+						'Invalid request',
+						'Authentication failed',
+					];
+
+					logContent += `[${timeString}] [${this.getRandomItem(errorLevels)}] ${this.getRandomItem(errorMessages)} from ${this.variables.clientIp}\n`;
+					break;
+
+				case 'debug':
+					const debugMessages = [
+						'User authentication attempt',
+						'Database query executed',
+						'Cache miss for key',
+						'API request processed',
+						'Session created',
+						'File uploaded',
+					];
+
+					logContent += `[${timeString}] DEBUG: ${this.getRandomItem(debugMessages)} - IP: ${this.variables.clientIp}\n`;
+					break;
+			}
+		}
+
+		return logContent;
+	}
+
+	getContentType(): string {
+		return 'text/plain';
+	}
+
+	getDescription(): string {
+		return 'Log file';
+	}
+}
+
+export class ArchiveFileGenerator extends BaseTemplateGenerator {
+	protected initializeVariables(): void {
+		this.variables = {};
+	}
+
+	generate(): string {
+		// Generate partial archive with real headers but corrupted content
+		const archiveTypes = ['zip', 'tar', 'gz', 'rar', '7z'];
+		const archiveType = this.getRandomItem(archiveTypes);
+
+		let header = '';
+		let randomBytes = '';
+
+		// Generate random bytes (1KB to 10KB)
+		const byteCount = Math.floor(Math.random() * 9216) + 1024; // 1KB to 10KB
+		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+		for (let i = 0; i < byteCount; i++) {
+			randomBytes += chars[Math.floor(Math.random() * chars.length)];
+		}
+
+		switch (archiveType) {
+			case 'zip':
+				// ZIP file signature: PK\x03\x04
+				header = 'PK\x03\x04\x14\x00\x00\x00\x08\x00';
+				break;
+			case 'tar':
+				// TAR file (no specific signature, but has structure)
+				header = 'backup.txt\x00\x00\x00\x00\x00\x00\x00\x00\x00\x000000644\x000001750\x000001750\x00';
+				break;
+			case 'gz':
+				// GZIP signature: \x1f\x8b
+				header = '\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\x03';
+				break;
+			case 'rar':
+				// RAR signature: Rar!
+				header = 'Rar!\x1a\x07\x00\xcf\x90\x73\x00\x00\x0d\x00\x00\x00\x00\x00\x00\x00';
+				break;
+			case '7z':
+				// 7Z signature: 7z\xBC\xAF\x27\x1C
+				header = '7z\xBC\xAF\x27\x1C\x00\x03\x0b\x3f\xd6\xf5\xa8\x6d';
+				break;
+		}
+
+		return header + randomBytes;
+	}
+
+	getContentType(): string {
+		return 'application/octet-stream';
+	}
+
+	getDescription(): string {
+		return 'Corrupted archive file';
 	}
 }
