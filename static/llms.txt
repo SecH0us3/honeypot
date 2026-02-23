@@ -1,0 +1,19 @@
+# Cloudflare Honeypot
+
+A serverless edge-level security and deception system built on Cloudflare Workers.
+
+## Core Features
+- **Deception Mode**: Dynamically generates realistic fake responses (SQL dumps, Terraform states, .env files, AWS configs) to waste attacker resources and gather telemetry.
+- **Ghost Mode**: Returns empty responses while secretly blocking malicious IPs.
+- **Active Defense**: Automatically adds attacker IPs to a Cloudflare Account-level IP List.
+- **WAF Integration**: Automatically configures WAF rules to block IPs in the managed list.
+- **Auto-Cleanup**: Cron-based trigger purges IPs older than 3 hours to prevent list exhaustion.
+
+## Tech Stack
+- TypeScript
+- Cloudflare Workers
+- Cloudflare KV (Configuration)
+- Cloudflare IP Lists & WAF Rules
+
+## Configuration
+Setup is handled via the `/install` endpoint, which requires a Cloudflare API Token with specific permissions (Account WAF Edit, Filter Lists Edit, Zone Read).

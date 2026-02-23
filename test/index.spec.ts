@@ -21,8 +21,11 @@ describe('Hello World worker', () => {
 			<head>
 				<meta charset="UTF-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>Honeypot - Edge Security System</title>
+				<title>Cloudflare Honeypot - Edge Security & Deception System</title>
+				<meta name="description" content="A serverless edge-level honeypot for Cloudflare Workers that deceives automated scanners and automatically blocks malicious IPs using WAF lists." />
+				<meta name="keywords" content="cloudflare, honeypot, security, waf, edge computing, serverless, cyber security, deception technology" />
 				<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+				<link rel="llms" type="text/plain" href="/llms.txt" />
 				<link rel="preconnect" href="https://fonts.googleapis.com">
 				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 				<link
@@ -68,6 +71,17 @@ describe('Hello World worker', () => {
 					.header {
 						text-align: center;
 						margin-bottom: 40px;
+					}
+
+					.github-link {
+						color: var(--text-muted);
+						transition: color 0.2s ease;
+						display: inline-block;
+						margin-bottom: 15px;
+					}
+
+					.github-link:hover {
+						color: var(--accent);
 					}
 
 					.header h1 {
@@ -316,7 +330,13 @@ describe('Hello World worker', () => {
 
 			<body>
 				<div class="header">
-					<h1>Honeypot</h1>
+					<a href="https://github.com/SecH0us3/honeypot" target="_blank" class="github-link" title="View on GitHub">
+						<svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+							<path
+								d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.44-1.305.806-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+						</svg>
+					</a>
+					<h1>Cloudflare Honeypot</h1>
 					<p>Serverless Edge Security & Deception System</p>
 				</div>
 
@@ -330,8 +350,8 @@ describe('Hello World worker', () => {
 							<div class="step-title"><span class="step-number">1</span> Clone & Install</div>
 							<p>Download the repository and install dependencies.</p>
 							<pre><code>git clone https://github.com/SecH0us3/honeypot.git
-			cd honeypot
-			npm i</code></pre>
+cd honeypot
+npm i</code></pre>
 						</div>
 
 						<div class="step">
@@ -341,13 +361,14 @@ describe('Hello World worker', () => {
 						</div>
 
 						<div class="step">
-							<div class="step-title"><span class="step-number">3</span> Mint API Tokens</div>
+							<div class="step-title"><span class="step-number">3</span> Create API Token</div>
 							<p><a href="https://dash.cloudflare.com/" target="_blank">Go to your Cloudflare Dashboard</a> and create
 								an API Token. You will need the following permissions to
 								manage IP Lists automatically:</p>
 							<ul>
-								<li><code>Account Filter Lists : Edit</code></li>
-								<li><code>Zone : Read</code></li>
+								<li><code>Account : Account WAF : Edit</code></li>
+								<li><code>Account : Account Filter Lists : Edit</code></li>
+								<li><code>Zone : Zone : Read</code></li>
 							</ul>
 							<img src="/token-demo.png" alt="Cloudflare API Token Creation Demo"
 								style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: var(--border-radius); margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
@@ -356,19 +377,28 @@ describe('Hello World worker', () => {
 						<div class="step">
 							<div class="step-title"><span class="step-number">4</span> Initialize Config</div>
 							<p>Navigate to your worker's live URL (e.g., <code>https://your-worker.workers.dev/install</code>).
-								Paste your generated API token, your Zone ID, and select the behavior mode. The worker will
-								automatically create an IP List named <code>honeypot_ips</code>.</p>
+								Paste your generated API token, your Zone ID, and select the behavior mode.
+								<br><small style="color: var(--text-muted); display: block; margin-top: 5px;">(Zone ID can be found
+									on the Overview page of your website in Cloudflare)</small>
+								The worker will automatically create an IP List named <code>honeypot_ips</code> and
+								<strong>configure the WAF rule</strong> to block them.
+							</p>
 						</div>
 
-						<div class="step">
-							<div class="step-title"><span class="step-number">5</span> Configure WAF Rule</div>
-							<p>Return to the Cloudflare Dashboard: <strong>Security -> WAF -> Custom rules</strong>. Create a new
-								rule using the newly managed list:</p>
-							<pre><code>Field: IP Source Address
-			Operator: is in list
-			Value: honeypot_ips
-
-			Action: Managed Challenge (or Block)</code></pre>
+						<div
+							style="margin-top: 40px; padding: 20px; background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--border); border-radius: var(--border-radius);">
+							<h3 style="margin-top: 0; font-size: 1rem; color: var(--accent);">🔄 Maintenance & Reinstallation</h3>
+							<p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">To re-run the setup flow
+								(e.g., to update tokens or behavior) without clearing KV manually:</p>
+							<ol style="font-size: 0.85rem; padding-left: 20px; color: var(--text-muted);">
+								<li style="margin-bottom: 10px;">Set a secret key via CLI:
+									<pre
+										style="margin: 8px 0; padding: 10px;"><code>npx wrangler secret put REINSTALL_KEY</code></pre>
+								</li>
+								<li>Visit the protected install URL:
+									<pre style="margin: 8px 0; padding: 10px;"><code>/install?reinstall=YOUR_SECRET_KEY</code></pre>
+								</li>
+							</ol>
 						</div>
 					</div>
 
@@ -490,8 +520,11 @@ describe('Hello World worker', () => {
 			<head>
 				<meta charset="UTF-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>Honeypot - Edge Security System</title>
+				<title>Cloudflare Honeypot - Edge Security & Deception System</title>
+				<meta name="description" content="A serverless edge-level honeypot for Cloudflare Workers that deceives automated scanners and automatically blocks malicious IPs using WAF lists." />
+				<meta name="keywords" content="cloudflare, honeypot, security, waf, edge computing, serverless, cyber security, deception technology" />
 				<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+				<link rel="llms" type="text/plain" href="/llms.txt" />
 				<link rel="preconnect" href="https://fonts.googleapis.com">
 				<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 				<link
@@ -537,6 +570,17 @@ describe('Hello World worker', () => {
 					.header {
 						text-align: center;
 						margin-bottom: 40px;
+					}
+
+					.github-link {
+						color: var(--text-muted);
+						transition: color 0.2s ease;
+						display: inline-block;
+						margin-bottom: 15px;
+					}
+
+					.github-link:hover {
+						color: var(--accent);
 					}
 
 					.header h1 {
@@ -785,7 +829,13 @@ describe('Hello World worker', () => {
 
 			<body>
 				<div class="header">
-					<h1>Honeypot</h1>
+					<a href="https://github.com/SecH0us3/honeypot" target="_blank" class="github-link" title="View on GitHub">
+						<svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+							<path
+								d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.44-1.305.806-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+						</svg>
+					</a>
+					<h1>Cloudflare Honeypot</h1>
 					<p>Serverless Edge Security & Deception System</p>
 				</div>
 
@@ -799,8 +849,8 @@ describe('Hello World worker', () => {
 							<div class="step-title"><span class="step-number">1</span> Clone & Install</div>
 							<p>Download the repository and install dependencies.</p>
 							<pre><code>git clone https://github.com/SecH0us3/honeypot.git
-			cd honeypot
-			npm i</code></pre>
+cd honeypot
+npm i</code></pre>
 						</div>
 
 						<div class="step">
@@ -810,13 +860,14 @@ describe('Hello World worker', () => {
 						</div>
 
 						<div class="step">
-							<div class="step-title"><span class="step-number">3</span> Mint API Tokens</div>
+							<div class="step-title"><span class="step-number">3</span> Create API Token</div>
 							<p><a href="https://dash.cloudflare.com/" target="_blank">Go to your Cloudflare Dashboard</a> and create
 								an API Token. You will need the following permissions to
 								manage IP Lists automatically:</p>
 							<ul>
-								<li><code>Account Filter Lists : Edit</code></li>
-								<li><code>Zone : Read</code></li>
+								<li><code>Account : Account WAF : Edit</code></li>
+								<li><code>Account : Account Filter Lists : Edit</code></li>
+								<li><code>Zone : Zone : Read</code></li>
 							</ul>
 							<img src="/token-demo.png" alt="Cloudflare API Token Creation Demo"
 								style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: var(--border-radius); margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
@@ -825,19 +876,28 @@ describe('Hello World worker', () => {
 						<div class="step">
 							<div class="step-title"><span class="step-number">4</span> Initialize Config</div>
 							<p>Navigate to your worker's live URL (e.g., <code>https://your-worker.workers.dev/install</code>).
-								Paste your generated API token, your Zone ID, and select the behavior mode. The worker will
-								automatically create an IP List named <code>honeypot_ips</code>.</p>
+								Paste your generated API token, your Zone ID, and select the behavior mode.
+								<br><small style="color: var(--text-muted); display: block; margin-top: 5px;">(Zone ID can be found
+									on the Overview page of your website in Cloudflare)</small>
+								The worker will automatically create an IP List named <code>honeypot_ips</code> and
+								<strong>configure the WAF rule</strong> to block them.
+							</p>
 						</div>
 
-						<div class="step">
-							<div class="step-title"><span class="step-number">5</span> Configure WAF Rule</div>
-							<p>Return to the Cloudflare Dashboard: <strong>Security -> WAF -> Custom rules</strong>. Create a new
-								rule using the newly managed list:</p>
-							<pre><code>Field: IP Source Address
-			Operator: is in list
-			Value: honeypot_ips
-
-			Action: Managed Challenge (or Block)</code></pre>
+						<div
+							style="margin-top: 40px; padding: 20px; background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--border); border-radius: var(--border-radius);">
+							<h3 style="margin-top: 0; font-size: 1rem; color: var(--accent);">🔄 Maintenance & Reinstallation</h3>
+							<p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">To re-run the setup flow
+								(e.g., to update tokens or behavior) without clearing KV manually:</p>
+							<ol style="font-size: 0.85rem; padding-left: 20px; color: var(--text-muted);">
+								<li style="margin-bottom: 10px;">Set a secret key via CLI:
+									<pre
+										style="margin: 8px 0; padding: 10px;"><code>npx wrangler secret put REINSTALL_KEY</code></pre>
+								</li>
+								<li>Visit the protected install URL:
+									<pre style="margin: 8px 0; padding: 10px;"><code>/install?reinstall=YOUR_SECRET_KEY</code></pre>
+								</li>
+							</ol>
 						</div>
 					</div>
 

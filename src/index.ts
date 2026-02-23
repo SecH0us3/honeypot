@@ -50,7 +50,7 @@ export default {
 		const method = request.method;
 
 		// Serve static files for root path or legitimate requests
-		if (path === '/' || path === '/index.html' || path.endsWith('.png') || path.endsWith('.svg')) {
+		if (path === '/' || path === '/index.html' || path.endsWith('.png') || path.endsWith('.svg') || path === '/llms.txt') {
 			try {
 				const assetPath = path === '/' ? '/index.html' : path;
 				const asset = await env.ASSETS.fetch(new URL(assetPath, request.url));
