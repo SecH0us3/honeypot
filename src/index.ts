@@ -4,6 +4,8 @@
  */
 
 import { HONEYPOT_RULES, createGenerator, matchRule, HoneypotRule } from './config';
+import { blockIpInWaf } from './wafService';
+import { handleInstallRequest } from './install';
 
 // Environment variable helpers
 function getEnvBool(env: any, key: string, defaultValue: boolean = false): boolean {
@@ -23,6 +25,24 @@ function getEnvNumber(env: any, key: string, defaultValue: number): number {
 	return defaultValue;
 }
 
+// Check if system is configured
+async function isConfigured(env: any): Promise<boolean> {
+	// Check Env Vars first
+	if (env.CF_API_TOKEN && env.CF_ZONE_ID) return true;
+
+	// Check KV
+	if (env.HONEYPOT_CONFIG) {
+		try {
+			const token = await env.HONEYPOT_CONFIG.get('CF_API_TOKEN');
+			const zoneId = await env.HONEYPOT_CONFIG.get('CF_ZONE_ID');
+			if (token && zoneId) return true;
+		} catch (e) {
+			console.warn('Failed to read from KV:', e);
+		}
+	}
+	return false;
+}
+
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
@@ -40,6 +60,14 @@ export default {
 				console.log('Static asset not found, falling through to honeypot logic');
 			}
 		}
+
+		// Handle install page (allow trailing slash)
+		if (path === '/install' || path === '/install/') {
+			return await handleInstallRequest(request, env);
+		}
+
+		// Check configuration, but don't redirect so honeypot stays stealthy
+		// const configured = await isConfigured(env);
 
 		// Handle POST requests with random errors
 		if (method === 'POST') {
@@ -74,6 +102,9 @@ export default {
 					console.error('Webhook notification failed:', error);
 				}
 			}
+
+			// Block IP in WAF (async)
+			ctx.waitUntil(blockIpInWaf(clientIp, env));
 
 			try {
 				// Create generator with context

@@ -29,6 +29,12 @@ import {
 	LogFileGenerator,
 	ArchiveFileGenerator,
 } from './templateGenerators/specializedGenerators';
+import {
+	TerraformGenerator,
+	CicdConfigGenerator,
+	AiMlGenerator,
+	RemoteAccessGenerator,
+} from './templateGenerators/modernGenerators';
 import { RandomScannerResponseGenerator, EnhancedScannerResponseGenerator, ScannerDetector } from './templateGenerators/scannerDetector';
 import { TemplateGenerator, RandomDataContext } from './templateGenerators/types';
 
@@ -494,6 +500,76 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 		pattern: 'emails\\.mbox$',
 		generatorClass: DataLeakGenerator,
 		description: 'Email archive',
+	},
+
+	// Terraform
+	{
+		pattern: '\\.terraform/.*$',
+		generatorClass: TerraformGenerator,
+		description: 'Terraform directory',
+	},
+	{
+		pattern: 'main\\.tf$',
+		generatorClass: TerraformGenerator,
+		description: 'Terraform main file',
+	},
+	{
+		pattern: 'variables\\.tf$',
+		generatorClass: TerraformGenerator,
+		description: 'Terraform variables file',
+	},
+
+	// CI/CD
+	{
+		pattern: '\\.circleci/config\\.yml$',
+		generatorClass: CicdConfigGenerator,
+		description: 'CircleCI configuration',
+	},
+	{
+		pattern: '\\.travis\\.yml$',
+		generatorClass: CicdConfigGenerator,
+		description: 'Travis CI configuration',
+	},
+	{
+		pattern: 'azure-pipelines\\.yml$',
+		generatorClass: CicdConfigGenerator,
+		description: 'Azure Pipelines configuration',
+	},
+
+	// Modern Frameworks
+	{
+		pattern: 'remix\\.config\\.js$',
+		generatorClass: CicdConfigGenerator, // Reusing similar config structure or create specific if needed
+		description: 'Remix configuration',
+	},
+	{
+		pattern: 'astro\\.config\\.mjs$',
+		generatorClass: CicdConfigGenerator,
+		description: 'Astro configuration',
+	},
+
+	// AI/ML
+	{
+		pattern: '.*\\.ipynb$',
+		generatorClass: AiMlGenerator,
+		description: 'Jupyter Notebook',
+	},
+	{
+		pattern: '.*\\.(pt|h5|onnx)$',
+		generatorClass: AiMlGenerator,
+		description: 'Machine Learning Model',
+	},
+
+	// Remote Access
+	{
+		pattern: '.*\\.ovpn$',
+		generatorClass: RemoteAccessGenerator,
+		description: 'OpenVPN configuration',
+	},
+	{
+		pattern: '.*\\.rdp$',
+		generatorClass: RemoteAccessGenerator,
+		description: 'Remote Desktop configuration',
 	},
 
 	// User-Agent based scanner detection (lowest priority - catch-all)
