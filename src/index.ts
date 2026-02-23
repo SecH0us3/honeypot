@@ -102,7 +102,7 @@ export default {
 					'X-Frame-Options': 'SAMEORIGIN',
 					'X-Content-Type-Options': 'nosniff',
 					'Referrer-Policy': 'strict-origin-when-cross-origin',
-					'Content-Security-Policy': "default-src 'self'",
+					//'Content-Security-Policy': "default-src 'self'",
 					'X-Request-ID': generateRequestId(),
 					'X-Response-Time': `${delay}ms`,
 				};
