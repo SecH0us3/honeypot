@@ -45,31 +45,154 @@ export interface HoneypotRule {
 }
 
 export const HONEYPOT_RULES: HoneypotRule[] = [
-	// Git files
+	// 1. High-Value Credentials & Cloud (Highest Priority)
 	{
-		pattern: '\\.git/config$',
+		pattern: '^/\\.aws/(config|credentials)$',
+		generatorClass: AwsConfigGenerator,
+		description: 'AWS configuration and credentials',
+	},
+	{
+		pattern: '^/\\.(s3cfg|boto|gsutil)$',
+		generatorClass: CloudStorageFileGenerator,
+		description: 'Cloud storage configuration',
+	},
+	{
+		pattern: '^/\\.ssh/(id_rsa|id_ed25519|id_dsa|id_ecdsa|config|authorized_keys)$',
+		generatorClass: RemoteAccessGenerator,
+		description: 'SSH private keys and configuration',
+	},
+	{
+		pattern: '^/\\.kube/config$',
+		generatorClass: KubernetesConfigGenerator,
+		description: 'Kubernetes configuration',
+	},
+	{
+		pattern: '^/\\.(env|env\\..*|passwd|shadow|credentials)$',
+		generatorClass: EnvironmentFileGenerator,
+		description: 'Environment and sensitive credentials',
+	},
+
+	// 2. Version Control Systems
+	{
+		pattern: '/\\.git/config$',
 		generatorClass: GitConfigGenerator,
 		description: 'Git configuration file',
 	},
 	{
-		pattern: '\\.git/HEAD$',
+		pattern: '/\\.git/HEAD$',
 		generatorClass: GitHeadGenerator,
 		description: 'Git HEAD reference',
 	},
 	{
-		pattern: '\\.git/refs/heads/(main|master|develop)$',
+		pattern: '/\\.git/index$',
+		generatorClass: GitIndexGenerator,
+		description: 'Git index file',
+	},
+	{
+		pattern: '/\\.git/refs/heads/.*$',
 		generatorClass: GitRefGenerator,
 		description: 'Git branch reference',
 	},
 	{
-		pattern: '\\.git/index$',
-		generatorClass: GitIndexGenerator,
-		description: 'Git index file',
+		pattern: '^/\\.gitignore$',
+		generatorClass: GitIgnoreGenerator,
+		description: 'Git ignore file',
+	},
+	{
+		pattern: '^/\\.svn/entries$',
+		generatorClass: GitConfigGenerator,
+		description: 'SVN entries file',
+	},
+	{
+		pattern: '^/\\.hg/hgrc$',
+		generatorClass: GitConfigGenerator,
+		description: 'Mercurial configuration',
 	},
 
-	// Admin panels
+	// 3. Infrastructure as Code & DevOps
 	{
-		pattern: '(admin|administrator|wp-admin)/?$',
+		pattern: '\\.(tfstate|tfvars|tfstate\\.backup)$',
+		generatorClass: TerraformGenerator,
+		description: 'Terraform state and variables',
+	},
+	{
+		pattern: '(main|variables|outputs|provider)\\.tf$',
+		generatorClass: TerraformGenerator,
+		description: 'Terraform configuration',
+	},
+	{
+		pattern: '^/Dockerfile$',
+		generatorClass: DockerfileGenerator,
+		description: 'Docker configuration',
+	},
+	{
+		pattern: '^/docker-compose\\.ya?ml$',
+		generatorClass: DockerfileGenerator,
+		description: 'Docker Compose configuration',
+	},
+	{
+		pattern: '^/\\.dockerignore$',
+		generatorClass: DockerIgnoreGenerator,
+		description: 'Docker ignore file',
+	},
+	{
+		pattern: '\\.(circleci|github|gitlab-ci|travis|azure-pipelines)\\.ya?ml$',
+		generatorClass: CicdConfigGenerator,
+		description: 'CI/CD pipeline configuration',
+	},
+	{
+		pattern: '(Jenkinsfile|serverless\\.yml)$',
+		generatorClass: CicdConfigGenerator,
+		description: 'DevOps configuration',
+	},
+
+	// 4. Database & Sensitive Exports
+	{
+		pattern: '\\.(sql|db|sqlite|mdb)$',
+		generatorClass: DatabaseFileGenerator,
+		description: 'Database dump file',
+	},
+	{
+		pattern: '(dump|backup|users|customers|db|database)\\.(sql|csv|json|xml)$',
+		generatorClass: DataLeakGenerator,
+		description: 'Sensitive data export',
+	},
+	{
+		pattern: '\\.(bak|backup|old|orig|tmp|swp)$',
+		generatorClass: BackupFileGenerator,
+		description: 'Backup and temporary files',
+	},
+	{
+		pattern: '\\.(zip|tar|gz|rar|7z|bz2|xz)$',
+		generatorClass: ArchiveFileGenerator,
+		description: 'Archive and backup file',
+	},
+
+	// 5. Application Configuration
+	{
+		pattern: '^/\\.htaccess$',
+		generatorClass: HtaccessGenerator,
+		description: 'Apache configuration file',
+	},
+	{
+		pattern: '^/web\\.config$',
+		generatorClass: WebConfigGenerator,
+		description: 'IIS configuration file',
+	},
+	{
+		pattern: '(wp-config\\.php|config\\.php|settings\\.php|database\\.php)$',
+		generatorClass: EnvironmentFileGenerator,
+		description: 'Web application configuration',
+	},
+	{
+		pattern: '\\.(ini|conf|cfg|properties|toml|yaml|yml)$',
+		generatorClass: EnvironmentFileGenerator,
+		description: 'Generic configuration file',
+	},
+
+	// 6. Admin Panels & CMS
+	{
+		pattern: '(admin|administrator|wp-admin|manage|control|panel|dashboard)/?$',
 		generatorClass: AdminPanelGenerator,
 		description: 'Admin panel login page',
 	},
@@ -78,507 +201,142 @@ export const HONEYPOT_RULES: HoneypotRule[] = [
 		generatorClass: PhpMyAdminGenerator,
 		description: 'phpMyAdmin login page',
 	},
-
-	// WordPress
 	{
-		pattern: 'wp-login\\.php$',
+		pattern: '(wp-login\\.php|login\\.php|auth\\.php|signin\\.php)$',
 		generatorClass: WordPressLoginGenerator,
-		description: 'WordPress login page',
-	},
-	{
-		pattern: 'wp-admin/?$',
-		generatorClass: WordPressLoginGenerator,
-		description: 'WordPress admin login',
+		description: 'Login page',
 	},
 
-	// Backup files
+	// 7. Development & Package Managers
 	{
-		pattern: '\\.(bak|backup|old|orig|tmp)$',
-		generatorClass: BackupFileGenerator,
-		description: 'Backup file',
-	},
-
-	// Database files
-	{
-		pattern: '\\.(sql|db|sqlite|mdb)$',
-		generatorClass: DatabaseFileGenerator,
-		description: 'Database dump file',
-	},
-
-	// Environment files
-	{
-		pattern: '\\.(env|config|ini|conf)$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'Environment configuration file',
-	},
-
-	// Additional common attack vectors
-	{
-		pattern: 'config\\.php$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'PHP configuration file',
-	},
-	{
-		pattern: 'settings\\.php$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'PHP settings file',
-	},
-	{
-		pattern: 'database\\.php$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'Database configuration file',
-	},
-	{
-		pattern: 'wp-config\\.php$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'WordPress configuration file',
-	},
-	{
-		pattern: '\\.htaccess$',
-		generatorClass: HtaccessGenerator,
-		description: 'Apache configuration file',
-	},
-	{
-		pattern: 'web\\.config$',
-		generatorClass: WebConfigGenerator,
-		description: 'IIS configuration file',
-	},
-
-	// Common admin paths
-	{
-		pattern: 'admin\\.php$',
-		generatorClass: AdminPanelGenerator,
-		description: 'Admin PHP script',
-	},
-	{
-		pattern: 'login\\.php$',
-		generatorClass: AdminPanelGenerator,
-		description: 'Login PHP script',
-	},
-	{
-		pattern: 'manage/?$',
-		generatorClass: AdminPanelGenerator,
-		description: 'Management interface',
-	},
-	{
-		pattern: 'control/?$',
-		generatorClass: AdminPanelGenerator,
-		description: 'Control panel',
-	},
-	{
-		pattern: 'panel/?$',
-		generatorClass: AdminPanelGenerator,
-		description: 'Admin panel',
-	},
-
-	// Development files
-	{
-		pattern: 'composer\\.json$',
-		generatorClass: ComposerJsonGenerator,
-		description: 'Composer configuration',
-	},
-	{
-		pattern: 'package\\.json$',
+		pattern: '^/package\\.json$',
 		generatorClass: PackageJsonGenerator,
 		description: 'NPM package configuration',
 	},
 	{
-		pattern: 'yarn\\.lock$',
+		pattern: '^/composer\\.json$',
+		generatorClass: ComposerJsonGenerator,
+		description: 'Composer configuration',
+	},
+	{
+		pattern: '^/yarn\\.lock$',
 		generatorClass: YarnLockGenerator,
 		description: 'Yarn lock file',
 	},
 	{
-		pattern: 'composer\\.lock$',
+		pattern: '^/composer\\.lock$',
 		generatorClass: ComposerLockGenerator,
 		description: 'Composer lock file',
 	},
-
-	// Server info files
 	{
-		pattern: 'phpinfo\\.php$',
+		pattern: '(webpack|vite|next|nuxt|vue|astro|remix)\\.config\\..*$',
+		generatorClass: PackageJsonGenerator,
+		description: 'Framework configuration',
+	},
+	{
+		pattern: '^/\\.(npmrc|yarnrc|pypirc|gemrc|dockercfg)$',
+		generatorClass: EnvironmentFileGenerator,
+		description: 'Package manager credentials',
+	},
+
+	// 8. API & Documentation
+	{
+		pattern: '(swagger|openapi)\\.json$',
+		generatorClass: SwaggerJsonGenerator,
+		description: 'API documentation',
+	},
+	{
+		pattern: '(graphql|api-docs|api/v[0-9]/.*)$',
+		generatorClass: SwaggerJsonGenerator,
+		description: 'API endpoint',
+	},
+
+	// 9. System & Logs
+	{
+		pattern: '\\.(log|debug|trace|err|error_log|access_log)$',
+		generatorClass: LogFileGenerator,
+		description: 'System log file',
+	},
+	{
+		pattern: '(phpinfo|info|test)\\.php$',
 		generatorClass: PhpInfoGenerator,
 		description: 'PHP info page',
 	},
 	{
-		pattern: 'info\\.php$',
-		generatorClass: PhpInfoGenerator,
-		description: 'Server info page',
+		pattern: '^/\\.well-known/(security\\.txt|brave-rewards-verification\\.txt)$',
+		generatorClass: SecurityTxtGenerator,
+		description: 'Security and verification files',
 	},
 	{
-		pattern: 'test\\.php$',
-		generatorClass: AdminPanelGenerator,
-		description: 'Test PHP script',
-	},
-
-	// Logs and debug files
-	{
-		pattern: '\\.(log|debug|trace)$',
-		generatorClass: LogFileGenerator,
-		description: 'Log file',
-	},
-	{
-		pattern: 'error_log$',
-		generatorClass: LogFileGenerator,
-		description: 'Error log file',
-	},
-	{
-		pattern: 'access_log$',
-		generatorClass: LogFileGenerator,
-		description: 'Access log file',
-	},
-
-	// Archives and compressed files
-	{
-		pattern: '\\.(zip|tar|gz|rar|7z)$',
-		generatorClass: ArchiveFileGenerator,
-		description: 'Archive file',
-	},
-
-	// API endpoints
-	{
-		pattern: 'api/(v1|v2|v3)/.*$',
-		generatorClass: SwaggerJsonGenerator,
-		description: 'API endpoint',
-	},
-	{
-		pattern: 'graphql/?$',
-		generatorClass: SwaggerJsonGenerator,
-		description: 'GraphQL endpoint',
-	},
-	{
-		pattern: 'swagger\\.json$',
-		generatorClass: SwaggerJsonGenerator,
-		description: 'Swagger API documentation',
-	},
-	{
-		pattern: 'openapi\\.json$',
-		generatorClass: SwaggerJsonGenerator,
-		description: 'OpenAPI specification',
-	},
-	{
-		pattern: 'api-docs/?$',
-		generatorClass: SwaggerJsonGenerator,
-		description: 'API documentation',
-	},
-
-	// Cloud configuration files
-	{
-		pattern: '\\.aws/(config|credentials)$',
-		generatorClass: AwsConfigGenerator,
-		description: 'AWS configuration file',
-	},
-	{
-		pattern: 'aws-exports\\.js$',
-		generatorClass: AwsConfigGenerator,
-		description: 'AWS Amplify exports',
-	},
-	{
-		pattern: 'serverless\\.yml$',
-		generatorClass: AwsConfigGenerator,
-		description: 'Serverless framework configuration',
-	},
-	{
-		pattern: 'cloudformation\\.json$',
-		generatorClass: AwsConfigGenerator,
-		description: 'CloudFormation template',
-	},
-
-	// Container and DevOps files
-	{
-		pattern: 'Dockerfile$',
-		generatorClass: DockerfileGenerator,
-		description: 'Docker configuration',
-	},
-	{
-		pattern: 'docker-compose\\.ya?ml$',
-		generatorClass: DockerfileGenerator,
-		description: 'Docker Compose configuration',
-	},
-	{
-		pattern: '\\.dockerignore$',
-		generatorClass: DockerIgnoreGenerator,
-		description: 'Docker ignore file',
-	},
-	{
-		pattern: 'kubernetes\\.ya?ml$',
-		generatorClass: KubernetesConfigGenerator,
-		description: 'Kubernetes configuration',
-	},
-	{
-		pattern: 'k8s\\.ya?ml$',
-		generatorClass: KubernetesConfigGenerator,
-		description: 'Kubernetes configuration',
-	},
-
-	// CI/CD files
-	{
-		pattern: '\\.github/workflows/.*\\.ya?ml$',
-		generatorClass: BackupFileGenerator,
-		description: 'GitHub Actions workflow',
-	},
-	{
-		pattern: '\\.gitlab-ci\\.ya?ml$',
-		generatorClass: BackupFileGenerator,
-		description: 'GitLab CI configuration',
-	},
-	{
-		pattern: 'Jenkinsfile$',
-		generatorClass: BackupFileGenerator,
-		description: 'Jenkins pipeline configuration',
-	},
-
-	// Modern configuration files
-	{
-		pattern: '\\.(ya?ml|toml|properties|cfg)$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'Configuration file',
-	},
-	{
-		pattern: 'next\\.config\\.js$',
-		generatorClass: PackageJsonGenerator,
-		description: 'Next.js configuration',
-	},
-	{
-		pattern: 'nuxt\\.config\\.js$',
-		generatorClass: PackageJsonGenerator,
-		description: 'Nuxt.js configuration',
-	},
-	{
-		pattern: 'vue\\.config\\.js$',
-		generatorClass: PackageJsonGenerator,
-		description: 'Vue.js configuration',
-	},
-	{
-		pattern: 'webpack\\.config\\.js$',
-		generatorClass: PackageJsonGenerator,
-		description: 'Webpack configuration',
-	},
-	{
-		pattern: 'vite\\.config\\.(js|ts)$',
-		generatorClass: PackageJsonGenerator,
-		description: 'Vite configuration',
-	},
-
-	// Security and SEO files
-	{
-		pattern: 'robots\\.txt$',
+		pattern: '^/robots\\.txt$',
 		generatorClass: RobotsTxtGenerator,
 		description: 'Robots.txt file',
 	},
 	{
-		pattern: '\\.well-known/security\\.txt$',
-		generatorClass: SecurityTxtGenerator,
-		description: 'Security.txt file',
-	},
-	{
-		pattern: 'sitemap\\.xml$',
+		pattern: '^/sitemap\\.xml$',
 		generatorClass: BackupFileGenerator,
-		description: 'XML sitemap',
+		description: 'Sitemap XML',
 	},
 
-	// IDE and editor files
+	// 10. Modern Tech (AI, Remote Access, etc.)
 	{
-		pattern: '\\.vscode/(settings|launch)\\.json$',
-		generatorClass: PackageJsonGenerator,
-		description: 'VS Code configuration',
-	},
-	{
-		pattern: '\\.gitignore$',
-		generatorClass: GitIgnoreGenerator,
-		description: 'Git ignore file',
-	},
-	{
-		pattern: '\\.idea/.*$',
-		generatorClass: BackupFileGenerator,
-		description: 'IntelliJ IDEA configuration',
-	},
-
-	// Database and cache files
-	{
-		pattern: 'redis\\.conf$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'Redis configuration',
-	},
-	{
-		pattern: 'mongodb\\.conf$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'MongoDB configuration',
-	},
-	{
-		pattern: 'nginx\\.conf$',
-		generatorClass: HtaccessGenerator,
-		description: 'Nginx configuration',
-	},
-
-	// Backup directories
-	{
-		pattern: '(backup|backups|old|archive)/?.*$',
-		generatorClass: BackupFileGenerator,
-		description: 'Backup directory',
-	},
-	{
-		pattern: '(tmp|temp|cache)/?.*$',
-		generatorClass: BackupFileGenerator,
-		description: 'Temporary directory',
-	},
-
-	// Version control systems
-	{
-		pattern: '\\.svn/entries$',
-		generatorClass: GitConfigGenerator,
-		description: 'SVN entries file',
-	},
-	{
-		pattern: '\\.hg/hgrc$',
-		generatorClass: GitConfigGenerator,
-		description: 'Mercurial configuration',
-	},
-
-	// Mobile app files
-	{
-		pattern: 'AndroidManifest\\.xml$',
-		generatorClass: WebConfigGenerator,
-		description: 'Android manifest',
-	},
-	{
-		pattern: 'Info\\.plist$',
-		generatorClass: WebConfigGenerator,
-		description: 'iOS Info.plist',
-	},
-
-	// Cryptocurrency and blockchain
-	{
-		pattern: 'wallet\\.dat$',
-		generatorClass: DatabaseFileGenerator,
-		description: 'Cryptocurrency wallet',
-	},
-	{
-		pattern: 'keystore\\.json$',
-		generatorClass: EnvironmentFileGenerator,
-		description: 'Ethereum keystore',
-	},
-
-	// Cloud storage configurations
-	{
-		pattern: 's3\\.config$',
-		generatorClass: CloudStorageFileGenerator,
-		description: 'S3 configuration file',
-	},
-	{
-		pattern: 'gcp-credentials\\.json$',
-		generatorClass: CloudStorageFileGenerator,
-		description: 'Google Cloud credentials',
-	},
-	{
-		pattern: 'azure-storage\\.conf$',
-		generatorClass: CloudStorageFileGenerator,
-		description: 'Azure storage configuration',
-	},
-
-	// Data leak patterns (high-value targets)
-	{
-		pattern: 'dump\\.sql$',
-		generatorClass: DataLeakGenerator,
-		description: 'Database dump file',
-	},
-	{
-		pattern: 'users\\.csv$',
-		generatorClass: DataLeakGenerator,
-		description: 'User data export',
-	},
-	{
-		pattern: 'credentials\\.txt$',
-		generatorClass: DataLeakGenerator,
-		description: 'Credential file',
-	},
-	{
-		pattern: 'passwords\\.txt$',
-		generatorClass: DataLeakGenerator,
-		description: 'Password file',
-	},
-	{
-		pattern: 'emails\\.mbox$',
-		generatorClass: DataLeakGenerator,
-		description: 'Email archive',
-	},
-
-	// Terraform
-	{
-		pattern: '\\.terraform/.*$',
-		generatorClass: TerraformGenerator,
-		description: 'Terraform directory',
-	},
-	{
-		pattern: 'main\\.tf$',
-		generatorClass: TerraformGenerator,
-		description: 'Terraform main file',
-	},
-	{
-		pattern: 'variables\\.tf$',
-		generatorClass: TerraformGenerator,
-		description: 'Terraform variables file',
-	},
-
-	// CI/CD
-	{
-		pattern: '\\.circleci/config\\.yml$',
-		generatorClass: CicdConfigGenerator,
-		description: 'CircleCI configuration',
-	},
-	{
-		pattern: '\\.travis\\.yml$',
-		generatorClass: CicdConfigGenerator,
-		description: 'Travis CI configuration',
-	},
-	{
-		pattern: 'azure-pipelines\\.yml$',
-		generatorClass: CicdConfigGenerator,
-		description: 'Azure Pipelines configuration',
-	},
-
-	// Modern Frameworks
-	{
-		pattern: 'remix\\.config\\.js$',
-		generatorClass: CicdConfigGenerator, // Reusing similar config structure or create specific if needed
-		description: 'Remix configuration',
-	},
-	{
-		pattern: 'astro\\.config\\.mjs$',
-		generatorClass: CicdConfigGenerator,
-		description: 'Astro configuration',
-	},
-
-	// AI/ML
-	{
-		pattern: '.*\\.ipynb$',
+		pattern: '\\.(ipynb|pt|h5|onnx|model)$',
 		generatorClass: AiMlGenerator,
-		description: 'Jupyter Notebook',
+		description: 'AI/ML model and notebook',
 	},
 	{
-		pattern: '.*\\.(pt|h5|onnx)$',
-		generatorClass: AiMlGenerator,
-		description: 'Machine Learning Model',
+		pattern: '\\.(ovpn|rdp|pcf|kdbx)$',
+		generatorClass: RemoteAccessGenerator,
+		description: 'Remote access and password vault',
 	},
 
-	// Remote Access
-	{
-		pattern: '.*\\.ovpn$',
-		generatorClass: RemoteAccessGenerator,
-		description: 'OpenVPN configuration',
-	},
-	{
-		pattern: '.*\\.rdp$',
-		generatorClass: RemoteAccessGenerator,
-		description: 'Remote Desktop configuration',
-	},
-
-	// User-Agent based scanner detection (lowest priority - catch-all)
+	// 11. Catch-all / Scanner Detection (Lowest Priority)
 	{
 		pattern: '.*', // Matches any path
 		generatorClass: EnhancedScannerResponseGenerator,
 		description: 'Scanner detection based on User-Agent',
 	},
 ];
+
+// Helper function to create generator with context
+export function createGenerator(
+	generatorClass: new (context?: RandomDataContext) => TemplateGenerator,
+	request: Request,
+	env?: any,
+): TemplateGenerator {
+	const context: RandomDataContext = {
+		companyName: env?.COMPANY_NAME,
+		companyDomain: env?.COMPANY_DOMAIN,
+		adminEmail: env?.ADMIN_EMAIL,
+		userAgent: request.headers.get('User-Agent') || undefined,
+		clientIp: request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For') || undefined,
+		timestamp: new Date(),
+		timezone: env?.TIMEZONE || 'UTC',
+		locale: env?.LOCALE || 'en_US',
+	};
+
+	return new generatorClass(context);
+}
+
+// Helper function to match request against rules
+export function matchRule(url: string, userAgent: string): HoneypotRule | null {
+	for (const rule of HONEYPOT_RULES) {
+		// Special handling for scanner detection rule
+		if (rule.generatorClass === EnhancedScannerResponseGenerator) {
+			if (ScannerDetector.isScannerUserAgent(userAgent)) {
+				return rule;
+			}
+			continue; // Skip this rule if not a scanner
+		}
+
+		// Regular pattern matching
+		const regex = new RegExp(rule.pattern);
+		if (regex.test(url)) {
+			return rule;
+		}
+	}
+	return null;
+}
 
 // Helper function to create generator with context
 export function createGenerator(
