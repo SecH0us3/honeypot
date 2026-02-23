@@ -1,10 +1,9 @@
 /**
- * Cloudflare WAF Integration Service
- * Handles blocking IPs by updating a specific WAF rule.
+ * Cloudflare IP List Integration Service
+ * Handles adding IPs to the Cloudflare List and cleaning up old entries.
  */
 
 const CF_API_BASE = 'https://api.cloudflare.com/client/v4';
-const RULE_DESCRIPTION = 'Honeypot Blocklist';
 
 interface CloudflareResponse<T> {
     success: boolean;
@@ -13,170 +12,128 @@ interface CloudflareResponse<T> {
     result: T;
 }
 
-interface FirewallRule {
+interface ListItem {
     id: string;
-    filter: {
-        id: string;
-        expression: string;
-        paused: boolean;
-    };
-    action: string;
-    description: string;
-}
-
-interface FirewallFilter {
-    id: string;
-    expression: string;
+    ip: string;
+    comment: string;
+    created_on: string;
 }
 
 /**
- * Block an IP address by adding it to the Honeypot WAF rule
+ * Add an IP address to the Honeypot IP List
  */
-export async function blockIpInWaf(ip: string, env: any): Promise<void> {
-    // Try to get credentials from KV first, then env vars
+export async function addIpToList(ip: string, reason: string, env: any): Promise<void> {
     let apiToken = await env.HONEYPOT_CONFIG?.get('CF_API_TOKEN');
-    let zoneId = await env.HONEYPOT_CONFIG?.get('CF_ZONE_ID');
+    let accountId = await env.HONEYPOT_CONFIG?.get('CF_ACCOUNT_ID');
+    let listId = await env.HONEYPOT_CONFIG?.get('CF_LIST_ID');
 
     if (!apiToken) apiToken = env.CF_API_TOKEN;
-    if (!zoneId) zoneId = env.CF_ZONE_ID;
+    if (!accountId) accountId = env.CF_ACCOUNT_ID;
+    if (!listId) listId = env.CF_LIST_ID;
 
-    if (!apiToken || !zoneId) {
-        console.warn('Missing CF_API_TOKEN or CF_ZONE_ID, skipping WAF block');
+    if (!apiToken || !accountId || !listId) {
+        console.warn('Missing Cloudflare configuration for IP List, skipping IP block');
         return;
     }
 
     try {
-        // 1. Find the existing rule
-        const rule = await findHoneypotRule(zoneId, apiToken);
+        const url = `${CF_API_BASE}/accounts/${accountId}/rules/lists/${listId}/items`;
 
-        if (rule) {
-            // 2. Update existing rule
-            await updateRuleWithIp(zoneId, apiToken, rule, ip);
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify([{
+                ip: ip,
+                comment: `[${reason}] - ${new Date().toISOString()} - Added by Honeypot`
+            }]),
+        });
+
+        const data = await response.json() as CloudflareResponse<any>;
+        if (!data.success) {
+            // It might fail if IP is already in the list, which is fine
+            console.log(`Failed to add IP to list (might already exist):`, data.errors);
         } else {
-            // 3. Create new rule
-            await createHoneypotRule(zoneId, apiToken, ip);
+            console.log(`Added IP ${ip} to Cloudflare List`);
         }
     } catch (error) {
-        console.error('Failed to block IP in WAF:', error);
+        console.error('Failed to add IP to Cloudflare List:', error);
     }
 }
 
-async function findHoneypotRule(zoneId: string, token: string): Promise<FirewallRule | null> {
-    const url = `${CF_API_BASE}/zones/${zoneId}/firewall/rules?description=${encodeURIComponent(RULE_DESCRIPTION)}`;
-    const response = await fetch(url, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
+/**
+ * Clean up IPs older than 3 hours from the list
+ */
+export async function cleanupOldIps(env: any): Promise<void> {
+    let apiToken = await env.HONEYPOT_CONFIG?.get('CF_API_TOKEN');
+    let accountId = await env.HONEYPOT_CONFIG?.get('CF_ACCOUNT_ID');
+    let listId = await env.HONEYPOT_CONFIG?.get('CF_LIST_ID');
 
-    const data = await response.json() as CloudflareResponse<FirewallRule[]>;
-    if (!data.success) {
-        throw new Error(`Failed to list rules: ${JSON.stringify(data.errors)}`);
-    }
+    if (!apiToken) apiToken = env.CF_API_TOKEN;
+    if (!accountId) accountId = env.CF_ACCOUNT_ID;
+    if (!listId) listId = env.CF_LIST_ID;
 
-    return data.result.length > 0 ? data.result[0] : null;
-}
-
-async function updateRuleWithIp(zoneId: string, token: string, rule: FirewallRule, ip: string): Promise<void> {
-    const currentExpression = rule.filter.expression;
-
-    // Check if IP is already in the expression
-    if (currentExpression.includes(ip)) {
-        console.log(`IP ${ip} is already blocked`);
+    if (!apiToken || !accountId || !listId) {
+        console.warn('Missing Cloudflare configuration for IP List, skipping cleanup');
         return;
     }
 
-    // Parse expression to find the list of IPs
-    // Assuming expression format: ip.src in { ... }
-    let newExpression = '';
-    if (currentExpression.includes('ip.src in {')) {
-        const match = currentExpression.match(/ip\.src in \{(.*?)\}/);
-        if (match) {
-            const existingIps = match[1];
-            newExpression = `ip.src in {${existingIps} ${ip}}`;
-        } else {
-            // Fallback if regex fails but structure looks right (shouldn't happen)
-            newExpression = `${currentExpression} or ip.src eq ${ip}`;
+    try {
+        // Fetch up to 1000 items (assuming list isn't astronomically huge. For production might need pagination)
+        const url = `${CF_API_BASE}/accounts/${accountId}/rules/lists/${listId}/items?limit=1000`;
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${apiToken}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const data = await response.json() as CloudflareResponse<ListItem[]>;
+        if (!data.success) {
+            throw new Error(`Failed to fetch list items: ${JSON.stringify(data.errors)}`);
         }
-    } else if (currentExpression.includes('ip.src eq')) {
-        // Convert single eq to list
-        const match = currentExpression.match(/ip\.src eq ([\d\.]+)/);
-        if (match) {
-            newExpression = `ip.src in {${match[1]} ${ip}}`;
+
+        const items = data.result;
+        if (!items || items.length === 0) return;
+
+        const threeHoursAgo = new Date();
+        threeHoursAgo.setHours(threeHoursAgo.getHours() - 3);
+
+        const itemsToDelete = items.filter(item => {
+            const created = new Date(item.created_on);
+            return created < threeHoursAgo;
+        });
+
+        if (itemsToDelete.length > 0) {
+            const deleteUrl = `${CF_API_BASE}/accounts/${accountId}/rules/lists/${listId}/items`;
+
+            // The API requires {"items":[{"id":"..."}]} or similar body depending on the exact list type,
+            // but for custom lists the standard is an items array with ids.
+            const payload = {
+                items: itemsToDelete.map(i => ({ id: i.id }))
+            };
+
+            const deleteResponse = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${apiToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const deleteData = await deleteResponse.json() as CloudflareResponse<any>;
+            if (deleteData.success) {
+                console.log(`Cleaned up ${itemsToDelete.length} old IPs from Cloudflare List`);
+            } else {
+                console.error(`Failed to delete old IPs:`, deleteData.errors);
+            }
         } else {
-            newExpression = `${currentExpression} or ip.src eq ${ip}`;
+            console.log('No old IPs found to clean up.');
         }
-    } else {
-        // Complex or unknown expression, append with OR
-        newExpression = `(${currentExpression}) or ip.src eq ${ip}`;
+    } catch (error) {
+        console.error('Failed to cleanup old IPs:', error);
     }
-
-    // Update the filter
-    const filterUrl = `${CF_API_BASE}/zones/${zoneId}/firewall/filters/${rule.filter.id}`;
-    const response = await fetch(filterUrl, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            id: rule.filter.id,
-            expression: newExpression,
-        }),
-    });
-
-    const data = await response.json() as CloudflareResponse<FirewallFilter>;
-    if (!data.success) {
-        throw new Error(`Failed to update filter: ${JSON.stringify(data.errors)}`);
-    }
-
-    console.log(`Added IP ${ip} to WAF rule`);
-}
-
-async function createHoneypotRule(zoneId: string, token: string, ip: string): Promise<void> {
-    // 1. Create Filter
-    const filterExpression = `ip.src in {${ip}}`;
-    const filterUrl = `${CF_API_BASE}/zones/${zoneId}/firewall/filters`;
-
-    const filterResponse = await fetch(filterUrl, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify([{
-            expression: filterExpression,
-            description: `${RULE_DESCRIPTION} Filter`,
-        }]),
-    });
-
-    const filterData = await filterResponse.json() as CloudflareResponse<FirewallFilter[]>;
-    if (!filterData.success) {
-        throw new Error(`Failed to create filter: ${JSON.stringify(filterData.errors)}`);
-    }
-
-    const filterId = filterData.result[0].id;
-
-    // 2. Create Rule linked to Filter
-    const ruleUrl = `${CF_API_BASE}/zones/${zoneId}/firewall/rules`;
-    const ruleResponse = await fetch(ruleUrl, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify([{
-            filter: { id: filterId },
-            action: 'block',
-            description: RULE_DESCRIPTION,
-        }]),
-    });
-
-    const ruleData = await ruleResponse.json() as CloudflareResponse<FirewallRule[]>;
-    if (!ruleData.success) {
-        throw new Error(`Failed to create rule: ${JSON.stringify(ruleData.errors)}`);
-    }
-
-    console.log(`Created WAF rule for IP ${ip}`);
 }

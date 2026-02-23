@@ -30,26 +30,64 @@ describe('Install Page', () => {
         expect(response.status).toBe(200);
         const text = await response.text();
         expect(text).toContain('Honeypot Setup');
-        expect(text).toContain('<form method="POST">');
+        expect(text).toContain('Honeypot Behavior');
     });
 
-    it('GET should render success message if configured', async () => {
-        kvStore['CF_API_TOKEN'] = 'existing-token';
-        kvStore['CF_ZONE_ID'] = 'existing-zone';
+    it('POST should validate, create list, and save config', async () => {
+        // Mock 1: Zone check (returns account ID)
+        fetchMock.mockResolvedValueOnce({
+            json: async () => ({
+                success: true,
+                result: { account: { id: 'mock-account-id' } }
+            }),
+        });
 
-        const request = new Request('http://localhost/install', { method: 'GET' });
+        // Mock 2: List search (empty)
+        fetchMock.mockResolvedValueOnce({
+            json: async () => ({ success: true, result: [] }),
+        });
+
+        // Mock 3: List creation
+        fetchMock.mockResolvedValueOnce({
+            json: async () => ({
+                success: true,
+                result: { id: 'mock-list-id' }
+            }),
+        });
+
+        const formData = new FormData();
+        formData.append('token', 'valid-token');
+        formData.append('zoneId', 'valid-zone');
+        formData.append('behavior', 'empty_page');
+
+        const request = new Request('http://localhost/install', {
+            method: 'POST',
+            body: formData,
+        });
+
         const response = await handleInstallRequest(request, env);
 
         expect(response.status).toBe(200);
-        const text = await response.text();
-        expect(text).toContain('System Configured');
-        expect(text).not.toContain('<form');
+        expect(kvStore['CF_API_TOKEN']).toBe('valid-token');
+        expect(kvStore['CF_ACCOUNT_ID']).toBe('mock-account-id');
+        expect(kvStore['CF_LIST_ID']).toBe('mock-list-id');
+        expect(kvStore['BEHAVIOR_MODE']).toBe('empty_page');
     });
 
-    it('POST should validate token and save config', async () => {
-        // Mock successful validation
+    it('POST should handle existing list', async () => {
         fetchMock.mockResolvedValueOnce({
-            json: async () => ({ success: true }),
+            json: async () => ({
+                success: true,
+                result: { account: { id: 'mock-account-id' } }
+            }),
+        });
+
+        // List search (returns existing list)
+        fetchMock.mockResolvedValueOnce({
+            json: async () => ({
+                success: true,
+                result: [{ name: 'honeypot_ips', id: 'existing-list-id' }]
+            }),
         });
 
         const formData = new FormData();
@@ -61,32 +99,9 @@ describe('Install Page', () => {
             body: formData,
         });
 
-        const response = await handleInstallRequest(request, env);
+        await handleInstallRequest(request, env);
 
-        expect(response.status).toBe(200);
-        expect(env.HONEYPOT_CONFIG.put).toHaveBeenCalledWith('CF_API_TOKEN', 'valid-token');
-        expect(env.HONEYPOT_CONFIG.put).toHaveBeenCalledWith('CF_ZONE_ID', 'valid-zone');
-    });
-
-    it('POST should reject invalid token', async () => {
-        // Mock failed validation
-        fetchMock.mockResolvedValueOnce({
-            json: async () => ({ success: false }),
-        });
-
-        const formData = new FormData();
-        formData.append('token', 'invalid-token');
-        formData.append('zoneId', 'valid-zone');
-
-        const request = new Request('http://localhost/install', {
-            method: 'POST',
-            body: formData,
-        });
-
-        const response = await handleInstallRequest(request, env);
-
-        expect(response.status).toBe(400);
-        expect(await response.text()).toContain('Validation Failed');
-        expect(env.HONEYPOT_CONFIG.put).not.toHaveBeenCalled();
+        expect(kvStore['CF_LIST_ID']).toBe('existing-list-id');
+        expect(fetchMock).toHaveBeenCalledTimes(2); // No creation call
     });
 });

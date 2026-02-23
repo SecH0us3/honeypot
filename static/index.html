@@ -1,491 +1,474 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Honeypot - Cloudflare Worker Security Project</title>
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<style>
-			body {
-				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-				line-height: 1.6;
-				color: #333;
-				max-width: 800px;
-				margin: 0 auto;
-				padding: 20px;
-				background-color: #f8f9fa;
-			}
-			.container {
-				background: white;
-				padding: 40px;
-				border-radius: 8px;
-				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-			}
-			h1 {
-				color: #2c3e50;
-				border-bottom: 3px solid #3498db;
-				padding-bottom: 10px;
-			}
-			h2 {
-				color: #34495e;
-				margin-top: 30px;
-			}
-			.highlight {
-				background-color: #fff3cd;
-				border: 1px solid #ffeaa7;
-				border-radius: 4px;
-				padding: 15px;
-				margin: 20px 0;
-			}
-			.feature-list {
-				list-style: none;
-				padding: 0;
-			}
-			.feature-list li {
-				background: #ecf0f1;
-				margin: 10px 0;
-				padding: 10px;
-				border-left: 4px solid #3498db;
-				border-radius: 4px;
-			}
-			.tech-stack {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 10px;
-				margin: 20px 0;
-			}
-			.tech-tag {
-				background: #3498db;
-				color: white;
-				padding: 5px 10px;
-				border-radius: 15px;
-				font-size: 12px;
-				font-weight: bold;
-			}
-			.warning {
-				background-color: #fee;
-				border: 1px solid #fcc;
-				color: #c33;
-				padding: 15px;
-				border-radius: 4px;
-				margin: 20px 0;
-			}
-			code {
-				background: #f4f4f4;
-				padding: 2px 4px;
-				border-radius: 3px;
-				font-family: 'Consolas', 'Monaco', monospace;
-			}
-			.footer {
-				text-align: center;
-				margin-top: 40px;
-				padding-top: 20px;
-				border-top: 1px solid #eee;
-				color: #666;
-			}
-		</style>
-	</head>
-	<body>
-		<div class="container">
-			<h1>🍯 Honeypot - Cloudflare Worker</h1>
 
-			<div class="highlight">
-				<strong>What is a Honeypot:</strong> It's an intelligent trap for attackers that mimics vulnerable files and configurations,
-				tracks attack attempts, and provides realistic fake data. The Honeypot works as a decoy, forcing attackers to waste time
-				analyzing useless information while recording all their actions.
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Honeypot - Edge Security System</title>
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+		rel="stylesheet">
+	<style>
+		:root {
+			--bg-base: #0f172a;
+			/* Slate 900 */
+			--bg-card: #1e293b;
+			/* Slate 800 */
+			--bg-code: #020617;
+			/* Slate 950 */
+			--border: #334155;
+			/* Slate 700 */
+			--text-main: #cbd5e1;
+			/* Slate 300 */
+			--text-muted: #94a3b8;
+			/* Slate 400 */
+			--text-heading: #f8fafc;
+			/* Slate 50 */
+			--accent: #38bdf8;
+			/* Light Blue 400 */
+			--accent-hover: #0ea5e9;
+			/* Light Blue 500 */
+			--border-radius: 8px;
+		}
+
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			font-family: 'Inter', -apple-system, sans-serif;
+			background-color: var(--bg-base);
+			color: var(--text-main);
+			line-height: 1.6;
+			padding: 40px 20px;
+		}
+
+		.header {
+			text-align: center;
+			margin-bottom: 40px;
+		}
+
+		.header h1 {
+			color: var(--text-heading);
+			font-size: 2.5rem;
+			font-weight: 700;
+			letter-spacing: -0.025em;
+			margin-bottom: 10px;
+		}
+
+		.header p {
+			color: var(--text-muted);
+			font-size: 1.1rem;
+		}
+
+		.layout-grid {
+			display: grid;
+			grid-template-columns: 1fr 1.6fr 350px;
+			/* Left, Middle, Right */
+			gap: 40px;
+			max-width: 1550px;
+			margin: 0 auto;
+			align-items: start;
+		}
+
+		@media (max-width: 1100px) {
+			.layout-grid {
+				grid-template-columns: 1fr 1fr;
+			}
+
+			.col-demo {
+				grid-column: 1 / -1;
+			}
+		}
+
+		@media (max-width: 768px) {
+			.layout-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		.card {
+			background: var(--bg-card);
+			border: 1px solid var(--border);
+			border-radius: var(--border-radius);
+			padding: 25px;
+			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+		}
+
+		.card h2 {
+			color: var(--text-heading);
+			font-size: 1.25rem;
+			font-weight: 600;
+			border-bottom: 1px solid var(--border);
+			padding-bottom: 12px;
+			margin-bottom: 20px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.card h3 {
+			color: var(--text-heading);
+			font-size: 1.1rem;
+			font-weight: 600;
+			margin: 24px 0 12px;
+		}
+
+		p {
+			margin-bottom: 16px;
+		}
+
+		a {
+			color: var(--accent);
+			text-decoration: none;
+			transition: color 0.15s ease;
+		}
+
+		a:hover {
+			color: var(--accent-hover);
+			text-decoration: underline;
+		}
+
+		code {
+			font-family: 'JetBrains Mono', monospace;
+			background: var(--bg-code);
+			border: 1px solid var(--border);
+			padding: 2px 6px;
+			border-radius: 4px;
+			font-size: 0.85em;
+			color: #e2e8f0;
+		}
+
+		pre {
+			background: var(--bg-code);
+			border: 1px solid var(--border);
+			padding: 16px;
+			border-radius: var(--border-radius);
+			overflow-x: auto;
+			margin-bottom: 20px;
+		}
+
+		pre code {
+			background: transparent;
+			border: none;
+			padding: 0;
+			color: #e2e8f0;
+			font-size: 0.85em;
+		}
+
+		/* Left Column Specifics */
+		.step {
+			margin-bottom: 24px;
+			position: relative;
+		}
+
+		.step-title {
+			display: flex;
+			align-items: center;
+			margin-bottom: 10px;
+			color: var(--text-heading);
+			font-weight: 500;
+		}
+
+		.step-number {
+			background: var(--accent);
+			color: var(--bg-base);
+			width: 22px;
+			height: 22px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			font-size: 0.75rem;
+			font-weight: 700;
+			margin-right: 12px;
+			flex-shrink: 0;
+		}
+
+		.step p {
+			padding-left: 34px;
+			margin-bottom: 10px;
+			font-size: 0.95rem;
+			color: var(--text-muted);
+		}
+
+		.step pre {
+			margin-left: 34px;
+		}
+
+		/* Middle Column Specifics */
+		.goal-highlight {
+			background: rgba(56, 189, 248, 0.1);
+			border-left: 4px solid var(--accent);
+			padding: 16px 20px;
+			border-radius: 0 var(--border-radius) var(--border-radius) 0;
+			margin-bottom: 30px;
+			font-size: 1.05rem;
+		}
+
+		ul {
+			padding-left: 20px;
+			margin-bottom: 20px;
+		}
+
+		ul li {
+			margin-bottom: 8px;
+		}
+
+		.tech-stack {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 15px;
+		}
+
+		.tech-tag {
+			background: var(--bg-code);
+			border: 1px solid var(--border);
+			color: var(--text-muted);
+			padding: 6px 12px;
+			border-radius: 20px;
+			font-size: 0.8rem;
+			font-family: 'JetBrains Mono', monospace;
+		}
+
+		/* Right Column Specifics */
+		.demo-group {
+			margin-bottom: 25px;
+		}
+
+		.demo-group:last-child {
+			margin-bottom: 0;
+		}
+
+		.demo-group h4 {
+			color: var(--text-muted);
+			font-size: 0.85rem;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+			margin-bottom: 10px;
+		}
+
+		.demo-list {
+			list-style: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.demo-list li {
+			margin-bottom: 6px;
+		}
+
+		.demo-link {
+			display: flex;
+			align-items: center;
+			font-family: 'JetBrains Mono', monospace;
+			font-size: 0.85rem;
+			color: var(--text-main);
+			background: var(--bg-code);
+			border: 1px solid var(--border);
+			padding: 8px 12px;
+			border-radius: 6px;
+			transition: all 0.2s ease;
+		}
+
+		.demo-link:hover {
+			background: var(--border);
+			color: var(--text-heading);
+			border-color: var(--accent);
+		}
+
+		.demo-link::before {
+			content: "GET";
+			font-size: 0.65rem;
+			background: #22c55e;
+			/* Green */
+			color: #000;
+			padding: 2px 6px;
+			border-radius: 10px;
+			margin-right: 10px;
+			font-weight: 700;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="header">
+		<h1>Honeypot</h1>
+		<p>Serverless Edge Security & Deception System</p>
+	</div>
+
+	<div class="layout-grid">
+
+		<!-- Left Column: Setup Guide -->
+		<div class="card col-setup">
+			<h2>🔧 Configuration & Setup</h2>
+
+			<div class="step">
+				<div class="step-title"><span class="step-number">1</span> Clone & Install</div>
+				<p>Download the repository and install dependencies.</p>
+				<pre><code>git clone https://github.com/SecH0us3/honeypot.git
+cd honeypot
+npm i</code></pre>
 			</div>
 
-			<h2>🔄 How It Works</h2>
-			<ul class="feature-list">
-				<li><strong>1. Request Interception:</strong> Worker analyzes all incoming HTTP requests to suspicious paths</li>
-				<li><strong>2. Threat Detection:</strong> Automatic identification of scanners by User-Agent and behavior</li>
-				<li><strong>3. Trap Generation:</strong> Creating realistic fake content for each type of attack</li>
-				<li><strong>4. Attack Logging:</strong> Recording all suspicious requests with detailed information</li>
-				<li><strong>5. Notifications:</strong> Sending webhook notifications about attack attempts in real-time</li>
-				<li><strong>6. Slowing Down Attackers:</strong> Random delays and realistic headers for authenticity</li>
-			</ul>
+			<div class="step">
+				<div class="step-title"><span class="step-number">2</span> Deploy to Cloudflare</div>
+				<p>Deploy the worker to Cloudflare's edge network using Wrangler.</p>
+				<pre><code>npx wrangler deploy</code></pre>
+			</div>
 
-			<h2>📋 Key Features</h2>
-			<ul class="feature-list">
-				<li><strong>Scanner Detection:</strong> Automatic identification of scanning tools via User-Agent</li>
-				<li><strong>Vulnerability Simulation:</strong> Generate fake content for popular attack targets</li>
-				<li><strong>Attack Monitoring:</strong> Log all suspicious requests with detailed information</li>
-				<li><strong>Webhook Notifications:</strong> Real-time attack attempt notifications</li>
-				<li><strong>Realistic Responses:</strong> Random delays and headers for authenticity</li>
-				<li><strong>Multiple Formats:</strong> Support for HTML, JSON, XML and other response formats</li>
-			</ul>
+			<div class="step">
+				<div class="step-title"><span class="step-number">3</span> Create API Token</div>
+				<p><a href="https://dash.cloudflare.com/" target="_blank">Go to your Cloudflare Dashboard</a> and create
+					an API Token. You will need the following permissions to
+					manage IP Lists automatically:</p>
+				<ul>
+					<li><code>Account : Account WAF : Edit</code></li>
+					<li><code>Account : Account Filter Lists : Edit</code></li>
+					<li><code>Zone : Zone : Read</code></li>
+				</ul>
+				<img src="/token-demo.png" alt="Cloudflare API Token Creation Demo"
+					style="max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: var(--border-radius); margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" />
+			</div>
 
-			<h2>🎯 Types of Simulated Vulnerabilities</h2>
+			<div class="step">
+				<div class="step-title"><span class="step-number">4</span> Initialize Config</div>
+				<p>Navigate to your worker's live URL (e.g., <code>https://your-worker.workers.dev/install</code>).
+					Paste your generated API token, your Zone ID, and select the behavior mode.
+					<br><small style="color: var(--text-muted); display: block; margin-top: 5px;">(Zone ID can be found
+						on the Overview page of your website in Cloudflare)</small>
+					The worker will automatically create an IP List named <code>honeypot_ips</code> and
+					<strong>configure the WAF rule</strong> to block them.
+				</p>
+			</div>
+
+			<div
+				style="margin-top: 40px; padding: 20px; background: rgba(56, 189, 248, 0.05); border: 1px dashed var(--border); border-radius: var(--border-radius);">
+				<h3 style="margin-top: 0; font-size: 1rem; color: var(--accent);">🔄 Maintenance & Reinstallation</h3>
+				<p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">To re-run the setup flow
+					(e.g., to update tokens or behavior) without clearing KV manually:</p>
+				<ol style="font-size: 0.85rem; padding-left: 20px; color: var(--text-muted);">
+					<li style="margin-bottom: 10px;">Set a secret key via CLI:
+						<pre
+							style="margin: 8px 0; padding: 10px;"><code>npx wrangler secret put REINSTALL_KEY</code></pre>
+					</li>
+					<li>Visit the protected install URL:
+						<pre style="margin: 8px 0; padding: 10px;"><code>/install?reinstall=YOUR_SECRET_KEY</code></pre>
+					</li>
+				</ol>
+			</div>
+
+		</div>
+
+		<!-- Middle Column: Project Description -->
+		<div class="card col-desc">
+			<h2>🎯 Purpose & Architecture</h2>
+
+			<div class="goal-highlight">
+				<strong>Objective:</strong> Deploy an intelligent edge-level trap that simulates vulnerable
+				infrastructure, absorbs scanning attempts, and automatically banishes attackers from your entire network
+				using Cloudflare IP Lists.
+			</div>
+
+			<h3>Detailed Overview</h3>
+			<p>Modern web infrastructure is constantly probed by automated scanners, botnets, and script kiddies
+				searching for exposed <code>.git</code> directories, `.env` files, or vulnerable admin panels. This
+				Honeypot is designed to intercept these probes directly at the CDN Edge before they ever reach your
+				origin servers.</p>
+
+			<p>Instead of merely blocking the scanner, the Honeypot deceives it. It dynamically generates
+				hyper-realistic fake responses—such as artificial Terraform state files, populated OpenAPI schemas, or
+				convincing SQL dumps. This wastes the attacker's computational resources and provides rich telemetry on
+				their attack patterns.</p>
+
+			<h3>Key Mechanisms</h3>
 			<ul>
-				<li>
-					<strong>Git Repositories:</strong> <code>.git/config</code>, <code>.git/HEAD</code> - simulation of exposed repositories
-					with confidential information
-				</li>
-				<li><strong>Admin Panels:</strong> <code>/admin</code>, <code>/phpmyadmin</code> - fake administration interfaces</li>
-				<li><strong>CMS Vulnerabilities:</strong> WordPress, Drupal configurations - content management files</li>
-				<li>
-					<strong>Backup Files:</strong> <code>.bak</code>, <code>.backup</code>, <code>.old</code> - "forgotten" backups with
-					data
-				</li>
-				<li><strong>Databases:</strong> <code>.sql</code>, <code>.db</code>, dumps - database exports</li>
-				<li>
-					<strong>Configuration Files:</strong> <code>.env</code>, <code>config.php</code>, <code>wp-config.php</code> -
-					application settings
-				</li>
-				<li><strong>Cloud Configurations:</strong> AWS, Docker, Kubernetes files - infrastructure settings</li>
-				<li><strong>API Documentation:</strong> Swagger, OpenAPI specifications - API endpoint descriptions</li>
+				<li><strong>Active Defense Integration:</strong> When an attacker trips a wire, the Honeypot uses the
+					Cloudflare API to add their IP directly into an Account-level Custom List
+					(<code>honeypot_ips</code>).</li>
+				<li><strong>TTL Cleanup:</strong> A lightweight Cron trigger runs directly on the Worker, automatically
+					purging IPs older than 3 hours to prevent list exhaustion and avoid permanent lockouts for dynamic
+					IP addresses.</li>
+				<li><strong>Behavior Modes:</strong> Choose between "Ghost Mode" (returning empty 200/404 responses
+					while secretly blocking the IP) or "Deception Mode" (serving dynamic fake payloads).</li>
+				<li><strong>Realistic Latency:</strong> In deception mode, artificial latency is injected. Random
+					response delays mimic the time it would take a real backend server to generate an SQL dump or
+					compress an archive.</li>
 			</ul>
 
-			<h2>🔧 Technology Stack</h2>
+			<h3>Tech Stack</h3>
 			<div class="tech-stack">
 				<span class="tech-tag">TypeScript</span>
 				<span class="tech-tag">Cloudflare Workers</span>
-				<span class="tech-tag">Serverless</span>
-				<span class="tech-tag">Edge Computing</span>
-				<span class="tech-tag">Security</span>
-				<span class="tech-tag">Monitoring</span>
-			</div>
-
-			<h2>⚙️ Key Advantages</h2>
-			<ul>
-				<li><strong>Performance:</strong> Runs on Cloudflare's edge network worldwide</li>
-				<li><strong>Scalability:</strong> Automatic scaling without servers</li>
-				<li><strong>Intelligence:</strong> Adaptive responses based on request type and attacker</li>
-				<li><strong>Security:</strong> Isolation and protection from attacks at infrastructure level</li>
-				<li><strong>Analytics:</strong> Detailed logging and monitoring of all attack attempts</li>
-				<li><strong>Cost-Effective:</strong> Serverless architecture - pay only for usage</li>
-			</ul>
-
-			<h2>📊 Monitoring & Analytics</h2>
-			<ul>
-				<li><strong>Attacker Tracking:</strong> IP addresses, geolocation and temporal patterns</li>
-				<li><strong>Tool Analysis:</strong> User-Agent strings and scanner type identification</li>
-				<li><strong>Attack Geography:</strong> Map of attack attempt distribution by countries</li>
-				<li><strong>Vulnerability Statistics:</strong> Which types of traps trigger most often</li>
-				<li><strong>System Integration:</strong> Webhook notifications to Slack, Discord, Telegram</li>
-				<li><strong>Temporal Analysis:</strong> Activity peaks and correlation with known attacks</li>
-			</ul>
-
-			<div class="warning">
-				<strong>⚠️ Warning:</strong> This project is intended solely for educational purposes and protection of your own resources.
-				Use responsibly and in accordance with applicable laws. Do not use to disrupt other people's systems.
-			</div>
-
-			<h2>🧪 Try It Out - Demo Links</h2>
-			<p>
-				<strong>Experience the honeypot in action!</strong> Click the links below to see how different attack vectors trigger our
-				security traps. Each link will show you realistic fake content that would fool attackers:
-			</p>
-
-			<div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0">
-				<h3 style="margin-top: 0; color: #e74c3c">🎯 Git Repository Files</h3>
-				<p>Exposed Git files that attackers often target for source code and secrets:</p>
-				<ul>
-					<li>
-						<a href="/.git/config" target="_blank"><code>/.git/config</code></a> - Git configuration with fake repository info
-					</li>
-					<li>
-						<a href="/.git/HEAD" target="_blank"><code>/.git/HEAD</code></a> - Current branch reference
-					</li>
-					<li>
-						<a href="/.git/refs/heads/main" target="_blank"><code>/.git/refs/heads/main</code></a> - Main branch commit hash
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">🔐 Admin Panels</h3>
-				<p>Fake administrative interfaces that look convincingly real:</p>
-				<ul>
-					<li>
-						<a href="/admin/" target="_blank"><code>/admin/</code></a> - Generic admin login page
-					</li>
-					<li>
-						<a href="/phpmyadmin/" target="_blank"><code>/phpmyadmin/</code></a> - Database administration interface
-					</li>
-					<li>
-						<a href="/wp-admin/" target="_blank"><code>/wp-admin/</code></a> - WordPress admin panel
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">📄 Configuration Files</h3>
-				<p>Sensitive configuration files that contain "secrets":</p>
-				<ul>
-					<li>
-						<a href="/.env" target="_blank"><code>/.env</code></a> - Environment variables with API keys
-					</li>
-					<li>
-						<a href="/config.php" target="_blank"><code>config.php</code></a> - PHP application configuration
-					</li>
-					<li>
-						<a href="/wp-config.php" target="_blank"><code>wp-config.php</code></a> - WordPress database configuration
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">💾 Backup & Database Files</h3>
-				<p>Database dumps and backup files with fake sensitive data:</p>
-				<ul>
-					<li>
-						<a href="/backup.sql" target="_blank"><code>/backup.sql</code></a> - SQL database dump
-					</li>
-					<li>
-						<a href="/database.bak" target="_blank"><code>/database.bak</code></a> - Database backup file
-					</li>
-					<li>
-						<a href="/users.csv" target="_blank"><code>/users.csv</code></a> - User data export
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">🔧 Development Files</h3>
-				<p>Development and dependency files:</p>
-				<ul>
-					<li>
-						<a href="/composer.json" target="_blank"><code>/composer.json</code></a> - PHP dependency file
-					</li>
-					<li>
-						<a href="/package.json" target="_blank"><code>/package.json</code></a> - Node.js project file
-					</li>
-					<li>
-						<a href="/.htaccess" target="_blank"><code>/.htaccess</code></a> - Apache configuration
-					</li>
-					<li>
-						<a href="/yarn.lock" target="_blank"><code>/yarn.lock</code></a> - Yarn dependency lockfile
-					</li>
-					<li>
-						<a href="/composer.lock" target="_blank"><code>/composer.lock</code></a> - Composer dependency lockfile
-					</li>
-					<li>
-						<a href="/.dockerignore" target="_blank"><code>/.dockerignore</code></a> - Docker ignore patterns
-					</li>
-					<li>
-						<a href="/.gitignore" target="_blank"><code>/.gitignore</code></a> - Git ignore patterns
-					</li>
-					<li>
-						<a href="/web.config" target="_blank"><code>/web.config</code></a> - IIS configuration file
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">📊 API Documentation</h3>
-				<p>API specifications and documentation that reveal system architecture:</p>
-				<ul>
-					<li>
-						<a href="/swagger.json" target="_blank"><code>/swagger.json</code></a> - Swagger API documentation
-					</li>
-					<li>
-						<a href="/openapi.json" target="_blank"><code>/openapi.json</code></a> - OpenAPI specification
-					</li>
-					<li>
-						<a href="/api/v1/users" target="_blank"><code>/api/v1/users</code></a> - API endpoint documentation
-					</li>
-					<li>
-						<a href="/api/v2/admin" target="_blank"><code>/api/v2/admin</code></a> - Admin API endpoints
-					</li>
-					<li>
-						<a href="/graphql" target="_blank"><code>/graphql</code></a> - GraphQL endpoint
-					</li>
-					<li>
-						<a href="/api-docs/" target="_blank"><code>/api-docs/</code></a> - API documentation portal
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">📋 Log Files</h3>
-				<p>System logs that attackers search for sensitive information:</p>
-				<ul>
-					<li>
-						<a href="/error.log" target="_blank"><code>/error.log</code></a> - Application error log
-					</li>
-					<li>
-						<a href="/access.log" target="_blank"><code>/access.log</code></a> - Web server access log
-					</li>
-					<li>
-						<a href="/debug.log" target="_blank"><code>/debug.log</code></a> - Debug information log
-					</li>
-					<li>
-						<a href="/application.log" target="_blank"><code>/application.log</code></a> - Application activity log
-					</li>
-					<li>
-						<a href="/system.trace" target="_blank"><code>/system.trace</code></a> - System trace file
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">🗜️ Archive Files</h3>
-				<p>Compressed files that appear to contain sensitive backups:</p>
-				<ul>
-					<li>
-						<a href="/backup.zip" target="_blank"><code>/backup.zip</code></a> - ZIP archive with realistic header
-					</li>
-					<li>
-						<a href="/database.tar.gz" target="_blank"><code>/database.tar.gz</code></a> - Compressed database backup
-					</li>
-					<li>
-						<a href="/source.rar" target="_blank"><code>/source.rar</code></a> - RAR archive with source code
-					</li>
-					<li>
-						<a href="/files.7z" target="_blank"><code>/files.7z</code></a> - 7-Zip compressed archive
-					</li>
-					<li>
-						<a href="/export.tar" target="_blank"><code>/export.tar</code></a> - TAR archive file
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">☁️ Cloud & DevOps</h3>
-				<p>Cloud configuration and deployment files:</p>
-				<ul>
-					<li>
-						<a href="/Dockerfile" target="_blank"><code>/Dockerfile</code></a> - Docker container configuration
-					</li>
-					<li>
-						<a href="/docker-compose.yml" target="_blank"><code>/docker-compose.yml</code></a> - Docker Compose setup
-					</li>
-					<li>
-						<a href="/kubernetes.yaml" target="_blank"><code>/kubernetes.yaml</code></a> - Kubernetes deployment
-					</li>
-					<li>
-						<a href="/.aws/config" target="_blank"><code>/.aws/config</code></a> - AWS configuration file
-					</li>
-					<li>
-						<a href="/serverless.yml" target="_blank"><code>/serverless.yml</code></a> - Serverless framework config
-					</li>
-					<li>
-						<a href="/.github/workflows/deploy.yml" target="_blank"><code>/.github/workflows/deploy.yml</code></a> - GitHub
-						Actions workflow
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">🔍 Server Information</h3>
-				<p>Server information and status pages:</p>
-				<ul>
-					<li>
-						<a href="/phpinfo.php" target="_blank"><code>/phpinfo.php</code></a> - PHP configuration info
-					</li>
-					<li>
-						<a href="/info.php" target="_blank"><code>/info.php</code></a> - Server information page
-					</li>
-					<li>
-						<a href="/test.php" target="_blank"><code>/test.php</code></a> - Test script
-					</li>
-					<li>
-						<a href="/robots.txt" target="_blank"><code>/robots.txt</code></a> - Web crawler instructions
-					</li>
-					<li>
-						<a href="/.well-known/security.txt" target="_blank"><code>/.well-known/security.txt</code></a> - Security contact
-						info
-					</li>
-				</ul>
-
-				<h3 style="color: #e74c3c">🎯 Additional Attack Vectors</h3>
-				<p>Other common targets that attackers frequently probe:</p>
-				<ul>
-					<li>
-						<a href="/admin.php" target="_blank"><code>/admin.php</code></a> - Admin script
-					</li>
-					<li>
-						<a href="/login.php" target="_blank"><code>/login.php</code></a> - Login script
-					</li>
-					<li>
-						<a href="/manage/" target="_blank"><code>/manage/</code></a> - Management interface
-					</li>
-					<li>
-						<a href="/control/" target="_blank"><code>/control/</code></a> - Control panel
-					</li>
-					<li>
-						<a href="/panel/" target="_blank"><code>/panel/</code></a> - Admin panel
-					</li>
-					<li>
-						<a href="/wp-login.php" target="_blank"><code>/wp-login.php</code></a> - WordPress login
-					</li>
-					<li>
-						<a href="/settings.php" target="_blank"><code>/settings.php</code></a> - Settings configuration
-					</li>
-					<li>
-						<a href="/database.php" target="_blank"><code>/database.php</code></a> - Database configuration
-					</li>
-				</ul>
-			</div>
-
-			<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 4px; margin: 20px 0">
-				<strong>💡 What You'll See:</strong> Each link above will show you realistic fake content that includes:
-				<ul style="margin: 10px 0">
-					<li><strong>Authentic file formats:</strong> Proper JSON, YAML, SQL, and binary structures</li>
-					<li><strong>Realistic fake data:</strong> Usernames, passwords, API keys, database schemas</li>
-					<li><strong>Proper MIME types:</strong> Correct content-type headers for each file type</li>
-					<li><strong>Dynamic variations:</strong> Content changes on each request to avoid detection</li>
-					<li><strong>Real archive headers:</strong> ZIP, RAR, TAR files with authentic signatures</li>
-					<li><strong>Convincing API specs:</strong> Auto-generated OpenAPI documentation with multiple endpoints</li>
-					<li><strong>Authentic log formats:</strong> Realistic timestamps, IP addresses, and error messages</li>
-				</ul>
-				<strong>Note:</strong> All data is completely fake and generated dynamically. No real secrets are exposed!
-			</div>
-
-			<div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 20px; border-radius: 8px; margin: 20px 0">
-				<h3 style="margin-top: 0; color: #2e7d32">🔍 What Happens Behind the Scenes</h3>
-				<p>When you click any of the demo links above, here's what the honeypot system does:</p>
-				<ol style="margin: 15px 0; padding-left: 20px">
-					<li><strong>Request Analysis:</strong> Analyzes your User-Agent, IP address, and requested path</li>
-					<li><strong>Pattern Matching:</strong> Identifies which type of attack vector is being attempted</li>
-					<li><strong>Content Generation:</strong> Creates realistic fake content using randomized templates</li>
-					<li><strong>Logging:</strong> Records the attempt with timestamp and client information</li>
-					<li><strong>Response Delivery:</strong> Serves the fake content with authentic headers and delays</li>
-				</ol>
-				<p style="margin-top: 15px">
-					<strong>💡 Pro Tip:</strong> Check your browser's developer tools (F12) to see the realistic HTTP headers and response
-					times that make this honeypot so convincing!
-				</p>
-			</div>
-
-			<div style="background: #f0f8ff; border: 1px solid #2196f3; padding: 15px; border-radius: 4px; margin: 20px 0">
-				<strong>🎮 Interactive Challenges:</strong>
-				<p style="margin: 10px 0">
-					<strong>1. Dynamic Content:</strong> Try accessing the same URL multiple times - you'll notice the content changes
-					slightly each time! This variation helps avoid detection by automated tools.
-				</p>
-				<p style="margin: 10px 0">
-					<strong>2. Archive Headers:</strong> Try downloading <a href="/backup.zip" target="_blank">backup.zip</a> or
-					<a href="/source.rar" target="_blank">source.rar</a> - they have real file signatures but contain random data instead of
-					actual files.
-				</p>
-				<p style="margin: 10px 0">
-					<strong>3. API Documentation:</strong> Check <a href="/swagger.json" target="_blank">swagger.json</a> multiple times -
-					the API endpoints, schemas, and descriptions are auto-generated differently each time.
-				</p>
-				<p style="margin: 10px 0">
-					<strong>4. Log Analysis:</strong> Compare <a href="/error.log" target="_blank">error.log</a> vs
-					<a href="/access.log" target="_blank">access.log</a> - different log formats with realistic timestamps and IP addresses.
-				</p>
-				<p style="margin: 10px 0">
-					<strong>5. Git Repository:</strong> Visit <a href="/.git/config" target="_blank">/.git/config</a> several times and
-					compare the generated repository names, user emails, and commit hashes.
-				</p>
-			</div>
-
-			<h2>🚀 Deployment & Testing</h2>
-			<p>
-				The project is configured for deployment on Cloudflare Workers using Wrangler CLI. Supports environment variables for
-				behavior configuration and integration with external systems.
-			</p>
-
-			<p>
-				<strong>Testing:</strong> The project includes comprehensive tests (<code>test_honeypot.js</code> and
-				<code>test_post.js</code>) to verify all types of traps, POST requests, and random error generation. Tests help ensure that
-				all honeypot components work correctly.
-			</p>
-
-			<div class="footer">
-				<p>
-					Developed to enhance web application security<br />
-					<small>Use with caution and in accordance with ethical principles</small><br />
-					<a
-						href="https://github.com/SecH0us3/honeypot"
-						target="_blank"
-						style="color: #3498db; text-decoration: none; display: inline-flex; align-items: center; gap: 8px"
-					>
-						<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-							<path
-								d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-							/>
-						</svg>
-						View Source Code on GitHub
-					</a>
-				</p>
+				<span class="tech-tag">CF KV Storage</span>
+				<span class="tech-tag">CF Custom Lists</span>
+				<span class="tech-tag">WAF Rules</span>
 			</div>
 		</div>
-	</body>
+
+		<!-- Right Column: Demo Links -->
+		<div class="card col-demo">
+			<h2>🧪 Demo Traps</h2>
+
+			<p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Test endpoints that trigger
+				simulated payloads.</p>
+
+			<div class="demo-group">
+				<h4>Git / DevOps Hooks</h4>
+				<ul class="demo-list">
+					<li><a href="/.git/config" target="_blank" class="demo-link">/.git/config</a></li>
+					<li><a href="/.git/HEAD" target="_blank" class="demo-link">/.git/HEAD</a></li>
+					<li><a href="/.env" target="_blank" class="demo-link">/.env</a></li>
+					<li><a href="/.env.production" target="_blank" class="demo-link">/.env.production</a></li>
+					<li><a href="/docker-compose.yml" target="_blank" class="demo-link">/docker-compose.yml</a></li>
+					<li><a href="/.aws/config" target="_blank" class="demo-link">/.aws/config</a></li>
+					<li><a href="/.aws/credentials" target="_blank" class="demo-link">/.aws/credentials</a></li>
+				</ul>
+			</div>
+
+			<div class="demo-group">
+				<h4>Admin & Configs</h4>
+				<ul class="demo-list">
+					<li><a href="/wp-config.php" target="_blank" class="demo-link">/wp-config.php</a></li>
+					<li><a href="/wp-admin/" target="_blank" class="demo-link">/wp-admin/</a></li>
+					<li><a href="/admin/" target="_blank" class="demo-link">/admin/</a></li>
+					<li><a href="/phpmyadmin/" target="_blank" class="demo-link">/phpmyadmin/</a></li>
+					<li><a href="/config.php" target="_blank" class="demo-link">/config.php</a></li>
+					<li><a href="/settings.php" target="_blank" class="demo-link">/settings.php</a></li>
+				</ul>
+			</div>
+
+			<div class="demo-group">
+				<h4>Backups & Archives</h4>
+				<ul class="demo-list">
+					<li><a href="/backup.sql" target="_blank" class="demo-link">/backup.sql</a></li>
+					<li><a href="/backup.zip" target="_blank" class="demo-link">/backup.zip</a></li>
+					<li><a href="/users.csv" target="_blank" class="demo-link">/users.csv</a></li>
+					<li><a href="/database.bak" target="_blank" class="demo-link">/database.bak</a></li>
+					<li><a href="/source.zip" target="_blank" class="demo-link">/source.zip</a></li>
+					<li><a href="/export.tar" target="_blank" class="demo-link">/export.tar</a></li>
+				</ul>
+			</div>
+
+			<div class="demo-group">
+				<h4>API Interfaces</h4>
+				<ul class="demo-list">
+					<li><a href="/swagger.json" target="_blank" class="demo-link">/swagger.json</a></li>
+					<li><a href="/openapi.json" target="_blank" class="demo-link">/openapi.json</a></li>
+					<li><a href="/graphql" target="_blank" class="demo-link">/graphql</a></li>
+					<li><a href="/api-docs/" target="_blank" class="demo-link">/api-docs/</a></li>
+					<li><a href="/api/v1/users" target="_blank" class="demo-link">/api/v1/users</a></li>
+				</ul>
+			</div>
+		</div>
+
+	</div>
+</body>
+
 </html>

@@ -4,7 +4,7 @@
  */
 
 import { HONEYPOT_RULES, createGenerator, matchRule, HoneypotRule } from './config';
-import { blockIpInWaf } from './wafService';
+import { addIpToList, cleanupOldIps } from './wafService';
 import { handleInstallRequest } from './install';
 
 // Environment variable helpers
@@ -50,14 +50,15 @@ export default {
 		const method = request.method;
 
 		// Serve static files for root path or legitimate requests
-		if (path === '/' || path === '/index.html') {
+		if (path === '/' || path === '/index.html' || path.endsWith('.png') || path.endsWith('.svg')) {
 			try {
-				const asset = await env.ASSETS.fetch(new URL('/index.html', request.url));
+				const assetPath = path === '/' ? '/index.html' : path;
+				const asset = await env.ASSETS.fetch(new URL(assetPath, request.url));
 				if (asset.status === 200) {
 					return asset;
 				}
 			} catch (error) {
-				console.log('Static asset not found, falling through to honeypot logic');
+				console.log(`Static asset ${path} not found, falling through to honeypot logic`);
 			}
 		}
 
@@ -103,8 +104,20 @@ export default {
 				}
 			}
 
-			// Block IP in WAF (async)
-			ctx.waitUntil(blockIpInWaf(clientIp, env));
+			// Add IP to Cloudflare List (async)
+			ctx.waitUntil(addIpToList(clientIp, matchedRule.description, env));
+
+			// Check configured behavior mode
+			let behaviorMode = 'fake_data';
+			try {
+				if (env.HONEYPOT_CONFIG) behaviorMode = await env.HONEYPOT_CONFIG.get('BEHAVIOR_MODE') || 'fake_data';
+			} catch (e) {
+				console.warn('Failed to read BEHAVIOR_MODE:', e);
+			}
+
+			if (behaviorMode === 'empty_page') {
+				return new Response(null, { status: 200 });
+			}
 
 			try {
 				// Create generator with context
@@ -177,6 +190,9 @@ export default {
 		// For non-matching requests, return various realistic 404 responses
 		return generateNotFoundResponse(path, env);
 	},
+	async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+		ctx.waitUntil(cleanupOldIps(env));
+	}
 } satisfies ExportedHandler<Env>;
 
 /**
