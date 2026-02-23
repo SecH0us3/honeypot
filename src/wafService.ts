@@ -5,6 +5,9 @@
 
 const CF_API_BASE = 'https://api.cloudflare.com/client/v4';
 
+// In-memory cache for the current worker isolate to reduce redundant API calls
+const addedIpsCache = new Set<string>();
+
 interface CloudflareResponse<T> {
     success: boolean;
     errors: { code: number; message: string }[];
@@ -23,6 +26,11 @@ interface ListItem {
  * Add an IP address to the Honeypot IP List
  */
 export async function addIpToList(ip: string, reason: string, env: any): Promise<void> {
+    // Check local cache first to avoid redundant API calls
+    if (addedIpsCache.has(ip)) {
+        return;
+    }
+
     let apiToken = await env.HONEYPOT_CONFIG?.get('CF_API_TOKEN');
     let accountId = await env.HONEYPOT_CONFIG?.get('CF_ACCOUNT_ID');
     let listId = await env.HONEYPOT_CONFIG?.get('CF_LIST_ID');
@@ -52,11 +60,18 @@ export async function addIpToList(ip: string, reason: string, env: any): Promise
         });
 
         const data = await response.json() as CloudflareResponse<any>;
-        if (!data.success) {
-            // It might fail if IP is already in the list, which is fine
-            console.log(`Failed to add IP to list (might already exist):`, data.errors);
-        } else {
+        
+        if (data.success) {
             console.log(`Added IP ${ip} to Cloudflare List`);
+            addedIpsCache.add(ip);
+        } else {
+            // Check if error is because IP already exists (Cloudflare Error 10022 or similar message)
+            const isDuplicate = data.errors.some(e => e.message.includes('already exists') || e.code === 10022);
+            if (isDuplicate) {
+                addedIpsCache.add(ip);
+            } else {
+                console.log(`Failed to add IP to list:`, data.errors);
+            }
         }
     } catch (error) {
         console.error('Failed to add IP to Cloudflare List:', error);
