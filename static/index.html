@@ -17,315 +17,156 @@
 	<style>
 		:root {
 			--bg-base: #0f172a;
-			/* Slate 900 */
 			--bg-card: #1e293b;
-			/* Slate 800 */
 			--bg-code: #020617;
-			/* Slate 950 */
 			--border: #334155;
-			/* Slate 700 */
 			--text-main: #cbd5e1;
-			/* Slate 300 */
 			--text-muted: #94a3b8;
-			/* Slate 400 */
 			--text-heading: #f8fafc;
-			/* Slate 50 */
 			--accent: #38bdf8;
-			/* Light Blue 400 */
 			--accent-hover: #0ea5e9;
-			/* Light Blue 500 */
 			--border-radius: 8px;
 		}
 
-		* {
-			box-sizing: border-box;
-			margin: 0;
-			padding: 0;
-		}
+		* { box-sizing: border-box; margin: 0; padding: 0; }
+		body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg-base); color: var(--text-main); line-height: 1.6; padding: 40px 20px; }
 
-		body {
-			font-family: 'Inter', -apple-system, sans-serif;
-			background-color: var(--bg-base);
-			color: var(--text-main);
-			line-height: 1.6;
-			padding: 40px 20px;
-		}
+		.header-container { display: flex; align-items: center; justify-content: space-between; gap: 40px; max-width: 1400px; margin: 0 auto 60px; }
+		@media (max-width: 960px) { .header-container { flex-direction: column; text-align: center; gap: 30px; } }
 
-		.header {
-			text-align: center;
-			margin-bottom: 40px;
-		}
+		.header-content { flex: 1; text-align: left; }
+		@media (max-width: 960px) { .header-content { text-align: center; } }
+		.header-content h1 { color: var(--text-heading); font-size: 2.8rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 15px; display: flex; align-items: center; justify-content: flex-start; gap: 15px; }
+		@media (max-width: 960px) { .header-content h1 { justify-content: center; } }
+		.github-link { color: var(--text-muted); transition: color 0.2s ease; display: inline-flex; }
+		.github-link:hover { color: var(--accent); }
+		.header-content p { color: var(--text-muted); font-size: 1.2rem; margin-bottom: 25px; }
 
-		.header h1 {
-			color: var(--text-heading);
-			font-size: 2.5rem;
-			font-weight: 700;
-			letter-spacing: -0.025em;
-			margin-bottom: 10px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			gap: 15px;
-		}
+		/* Badges */
+		.badges { display: flex; justify-content: flex-start; gap: 10px; flex-wrap: wrap; }
+		@media (max-width: 960px) { .badges { justify-content: center; } }
+		.badge { padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; background: var(--bg-card); border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+		.badge-cf { color: #f6821f; border-color: rgba(246, 130, 31, 0.3); background: rgba(246, 130, 31, 0.05); }
+		.badge-license { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
+		.badge-version { color: var(--accent); border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05); }
 
-		.github-link {
-			color: var(--text-muted);
-			transition: color 0.2s ease;
-			display: inline-flex;
-		}
+		/* Animated Terminal */
+		.header-visual { flex: 1.2; width: 100%; min-width: 450px; }
+		@media (max-width: 960px) { .header-visual { min-width: 100%; } }
+		.hero-terminal { width: 100%; background: #000; border: 1px solid var(--border); border-radius: var(--border-radius); overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); text-align: left; margin: 0 auto; }
+		.terminal-header { background: #1e293b; padding: 8px 12px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+		.dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+		.dot.red { background: #ff5f56; } .dot.yellow { background: #ffbd2e; } .dot.green { background: #27c93f; }
+		.terminal-header .title { margin-left: auto; margin-right: auto; color: #94a3b8; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+		.terminal-body { padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #a3be8c; line-height: 1.6; height: 215px; overflow: hidden; position: relative; }
+		.term-line { margin-bottom: 4px; }
+		.term-prompt { color: #81a1c1; margin-right: 8px; }
+		.term-cmd { color: #ebcb8b; }
+		.term-err { color: #bf616a; font-weight: bold; }
+		.term-success { color: #a3be8c; }
+		.term-info { color: #88c0d0; }
+		.term-dim { color: #4c566a; }
+		.cursor { display: inline-block; width: 8px; height: 16px; background: #d8dee9; vertical-align: middle; animation: blink 1s step-end infinite; margin-left: 2px; }
+		@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-		.github-link:hover {
-			color: var(--accent);
-		}
+		.layout-grid { display: grid; grid-template-columns: 1fr 1.6fr 350px; gap: 40px; max-width: 1550px; margin: 0 auto; align-items: start; }
+		@media (max-width: 1100px) { .layout-grid { grid-template-columns: 1fr 1fr; } .col-demo { grid-column: 1 / -1; } }
+		@media (max-width: 768px) { .layout-grid { grid-template-columns: 1fr; } }
 
-		.header p {
-			color: var(--text-muted);
-			font-size: 1.1rem;
-		}
+		.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--border-radius); padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); }
+		.card h2 { color: var(--text-heading); font-size: 1.25rem; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+		.card h3 { color: var(--text-heading); font-size: 1.1rem; font-weight: 600; margin: 24px 0 12px; }
+		p { margin-bottom: 16px; }
+		a { color: var(--accent); text-decoration: none; transition: color 0.15s ease; }
+		a:hover { color: var(--accent-hover); text-decoration: underline; }
 
-		.layout-grid {
-			display: grid;
-			grid-template-columns: 1fr 1.6fr 350px;
-			/* Left, Middle, Right */
-			gap: 40px;
-			max-width: 1550px;
-			margin: 0 auto;
-			align-items: start;
-		}
+		code { font-family: 'JetBrains Mono', monospace; background: var(--bg-code); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #e2e8f0; }
+		pre { background: var(--bg-code); border: 1px solid var(--border); padding: 16px; border-radius: var(--border-radius); overflow-x: auto; margin-bottom: 20px; position: relative; }
+		pre code { background: transparent; border: none; padding: 0; color: #e2e8f0; font-size: 0.85em; }
 
-		@media (max-width: 1100px) {
-			.layout-grid {
-				grid-template-columns: 1fr 1fr;
-			}
-
-			.col-demo {
-				grid-column: 1 / -1;
-			}
-		}
-
-		@media (max-width: 768px) {
-			.layout-grid {
-				grid-template-columns: 1fr;
-			}
-		}
-
-		.card {
-			background: var(--bg-card);
-			border: 1px solid var(--border);
-			border-radius: var(--border-radius);
-			padding: 25px;
-			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-		}
-
-		.card h2 {
-			color: var(--text-heading);
-			font-size: 1.25rem;
-			font-weight: 600;
-			border-bottom: 1px solid var(--border);
-			padding-bottom: 12px;
-			margin-bottom: 20px;
-			display: flex;
-			align-items: center;
-			gap: 10px;
-		}
-
-		.card h3 {
-			color: var(--text-heading);
-			font-size: 1.1rem;
-			font-weight: 600;
-			margin: 24px 0 12px;
-		}
-
-		p {
-			margin-bottom: 16px;
-		}
-
-		a {
-			color: var(--accent);
-			text-decoration: none;
-			transition: color 0.15s ease;
-		}
-
-		a:hover {
-			color: var(--accent-hover);
-			text-decoration: underline;
-		}
-
-		code {
-			font-family: 'JetBrains Mono', monospace;
-			background: var(--bg-code);
-			border: 1px solid var(--border);
-			padding: 2px 6px;
-			border-radius: 4px;
-			font-size: 0.85em;
-			color: #e2e8f0;
-		}
-
-		pre {
-			background: var(--bg-code);
-			border: 1px solid var(--border);
-			padding: 16px;
-			border-radius: var(--border-radius);
-			overflow-x: auto;
-			margin-bottom: 20px;
-		}
-
-		pre code {
-			background: transparent;
-			border: none;
-			padding: 0;
-			color: #e2e8f0;
-			font-size: 0.85em;
-		}
+		/* Copy button */
+		.copy-btn { position: absolute; top: 8px; right: 8px; background: #1e293b; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; opacity: 0; font-family: 'Inter', sans-serif; }
+		pre:hover .copy-btn { opacity: 1; }
+		.copy-btn:hover { background: var(--border); color: var(--text-heading); border-color: var(--accent); }
 
 		/* Left Column Specifics */
-		.step {
-			margin-bottom: 24px;
-			position: relative;
-		}
-
-		.step-title {
-			display: flex;
-			align-items: center;
-			margin-bottom: 10px;
-			color: var(--text-heading);
-			font-weight: 500;
-		}
-
-		.step-number {
-			background: var(--accent);
-			color: var(--bg-base);
-			width: 22px;
-			height: 22px;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: 50%;
-			font-size: 0.75rem;
-			font-weight: 700;
-			margin-right: 12px;
-			flex-shrink: 0;
-		}
-
-		.step p {
-			padding-left: 34px;
-			margin-bottom: 10px;
-			font-size: 0.95rem;
-			color: var(--text-muted);
-		}
-
-		.step pre {
-			margin-left: 34px;
-		}
+		.step { margin-bottom: 24px; position: relative; }
+		.step-title { display: flex; align-items: center; margin-bottom: 10px; color: var(--text-heading); font-weight: 500; }
+		.step-number { background: var(--accent); color: var(--bg-base); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.75rem; font-weight: 700; margin-right: 12px; flex-shrink: 0; }
+		.step p { padding-left: 34px; margin-bottom: 10px; font-size: 0.95rem; color: var(--text-muted); }
+		.step pre { margin-left: 34px; }
 
 		/* Middle Column Specifics */
-		.goal-highlight {
-			background: rgba(56, 189, 248, 0.1);
-			border-left: 4px solid var(--accent);
-			padding: 16px 20px;
-			border-radius: 0 var(--border-radius) var(--border-radius) 0;
-			margin-bottom: 30px;
-			font-size: 1.05rem;
-		}
-
-		ul {
-			padding-left: 20px;
-			margin-bottom: 20px;
-		}
-
-		ul li {
-			margin-bottom: 8px;
-		}
-
-		.tech-stack {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-			margin-top: 15px;
-		}
-
-		.tech-tag {
-			background: var(--bg-code);
-			border: 1px solid var(--border);
-			color: var(--text-muted);
-			padding: 6px 12px;
-			border-radius: 20px;
-			font-size: 0.8rem;
-			font-family: 'JetBrains Mono', monospace;
-		}
+		.goal-highlight { background: rgba(56, 189, 248, 0.1); border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 var(--border-radius) var(--border-radius) 0; margin-bottom: 30px; font-size: 1.05rem; }
+		ul { padding-left: 20px; margin-bottom: 20px; }
+		ul li { margin-bottom: 8px; }
+		.tech-stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+		.tech-tag { background: var(--bg-code); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
 
 		/* Right Column Specifics */
-		.demo-group {
-			margin-bottom: 25px;
-		}
+		.demo-group { margin-bottom: 25px; }
+		.demo-group:last-child { margin-bottom: 0; }
+		.demo-group h4 { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+		.demo-list { list-style: none; padding: 0; margin: 0; }
+		.demo-list li { margin-bottom: 6px; }
+		.demo-link { display: flex; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-main); background: var(--bg-code); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; transition: all 0.2s ease; cursor: pointer; text-decoration: none !important; }
+		.demo-link:hover { background: var(--border); color: var(--text-heading); border-color: var(--accent); transform: translateX(4px); }
+		.demo-link::before { content: "GET"; font-size: 0.65rem; background: #22c55e; color: #000; padding: 2px 6px; border-radius: 10px; margin-right: 10px; font-weight: 700; }
 
-		.demo-group:last-child {
-			margin-bottom: 0;
-		}
+		/* Modal Styles */
+		.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+		.modal.show { display: flex; opacity: 1; }
+		.modal-content { background: #000; border: 1px solid var(--border); border-radius: var(--border-radius); width: 90%; max-width: 900px; height: 80vh; max-height: 700px; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: translateY(20px); transition: transform 0.3s ease; overflow: hidden; }
+		.modal.show .modal-content { transform: translateY(0); }
+		.modal .terminal-header { background: #1e293b; }
+		.modal-url-bar { background: #0f172a; padding: 8px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted); }
+		.modal-url-bar span { color: var(--text-heading); }
+		#demo-iframe { width: 100%; height: 100%; border: none; background: #1e1e1e; /* Darker background for iframe content */ }
+		#close-modal { cursor: pointer; position: relative; }
+		#close-modal:hover::after { content: '×'; position: absolute; top: -4px; left: 1px; color: #551a1a; font-size: 14px; font-weight: bold; line-height: 1; }
 
-		.demo-group h4 {
-			color: var(--text-muted);
-			font-size: 0.85rem;
-			text-transform: uppercase;
-			letter-spacing: 0.05em;
-			margin-bottom: 10px;
-		}
-
-		.demo-list {
-			list-style: none;
-			padding: 0;
-			margin: 0;
-		}
-
-		.demo-list li {
-			margin-bottom: 6px;
-		}
-
-		.demo-link {
-			display: flex;
-			align-items: center;
-			font-family: 'JetBrains Mono', monospace;
-			font-size: 0.85rem;
-			color: var(--text-main);
-			background: var(--bg-code);
-			border: 1px solid var(--border);
-			padding: 8px 12px;
-			border-radius: 6px;
-			transition: all 0.2s ease;
-		}
-
-		.demo-link:hover {
-			background: var(--border);
-			color: var(--text-heading);
-			border-color: var(--accent);
-		}
-
-		.demo-link::before {
-			content: "GET";
-			font-size: 0.65rem;
-			background: #22c55e;
-			/* Green */
-			color: #000;
-			padding: 2px 6px;
-			border-radius: 10px;
-			margin-right: 10px;
-			font-weight: 700;
-		}
+		/* Toasts */
+		.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1001; display: flex; flex-direction: column; gap: 10px; }
+		.toast { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); color: var(--text-heading); padding: 16px 20px; border-radius: var(--border-radius); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 12px; font-size: 0.95rem; animation: slideIn 0.3s forwards, fadeOut 0.4s 4s forwards; }
+		.toast.banned { border-left-color: #ef4444; }
+		.toast-icon { font-size: 1.2rem; }
+		@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+		@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(120%); } }
 	</style>
 </head>
 
 <body>
-	<div class="header">
-		<h1>
-			Cloudflare Honeypot
-			<a href="https://github.com/SecH0us3/honeypot" target="_blank" class="github-link" title="View on GitHub">
-				<svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-					<path
-						d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.44-1.305.806-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-				</svg>
-			</a>
-		</h1>
-		<p>Serverless Edge Security & Deception System</p>
+	<div class="header-container">
+		<div class="header-content">
+			<h1>
+				Cloudflare Honeypot
+				<a href="https://github.com/SecH0us3/honeypot" target="_blank" class="github-link" title="View on GitHub">
+					<svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+						<path
+							d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.44-1.305.806-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+					</svg>
+				</a>
+			</h1>
+			<p>Serverless Edge Security & Deception System</p>
+
+			<div class="badges">
+				<span class="badge badge-version">v1.1.0</span>
+				<span class="badge badge-cf">☁️ Cloudflare Workers</span>
+				<span class="badge badge-license">⚖️ MIT License</span>
+			</div>
+		</div>
+
+		<div class="header-visual">
+			<div class="hero-terminal">
+				<div class="terminal-header">
+					<span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+					<span class="title"><span style="color: #a3be8c; font-weight: bold;">edge-monitor</span><span style="color: #eceff4;">@</span><span style="color: #81a1c1; font-weight: bold;">honeypot</span><span style="color: #eceff4;">:</span><span style="color: #b48ead; font-weight: bold;">~</span></span>
+				</div>
+				<div class="terminal-body" id="anim-terminal">
+					<!-- Animated content injected by JS -->
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<div class="layout-grid">
@@ -441,59 +282,243 @@ npm i</code></pre>
 		<div class="card col-demo">
 			<h2>🧪 Demo Traps</h2>
 
-			<p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Test endpoints that trigger
-				simulated payloads.</p>
+			<p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Click endpoints to trigger simulated payloads in a preview window.</p>
 
 			<div class="demo-group">
 				<h4>Git / DevOps Hooks</h4>
 				<ul class="demo-list">
-					<li><a href="/.git/config" target="_blank" class="demo-link">/.git/config</a></li>
-					<li><a href="/.git/HEAD" target="_blank" class="demo-link">/.git/HEAD</a></li>
-					<li><a href="/.env" target="_blank" class="demo-link">/.env</a></li>
-					<li><a href="/.env.production" target="_blank" class="demo-link">/.env.production</a></li>
-					<li><a href="/docker-compose.yml" target="_blank" class="demo-link">/docker-compose.yml</a></li>
-					<li><a href="/.aws/config" target="_blank" class="demo-link">/.aws/config</a></li>
-					<li><a href="/.aws/credentials" target="_blank" class="demo-link">/.aws/credentials</a></li>
+					<li><a href="/.git/config" class="demo-link">/.git/config</a></li>
+					<li><a href="/.git/HEAD" class="demo-link">/.git/HEAD</a></li>
+					<li><a href="/.env" class="demo-link">/.env</a></li>
+					<li><a href="/.env.production" class="demo-link">/.env.production</a></li>
+					<li><a href="/docker-compose.yml" class="demo-link">/docker-compose.yml</a></li>
+					<li><a href="/.aws/config" class="demo-link">/.aws/config</a></li>
+					<li><a href="/.aws/credentials" class="demo-link">/.aws/credentials</a></li>
 				</ul>
 			</div>
 
 			<div class="demo-group">
 				<h4>Admin & Configs</h4>
 				<ul class="demo-list">
-					<li><a href="/wp-config.php" target="_blank" class="demo-link">/wp-config.php</a></li>
-					<li><a href="/wp-admin/" target="_blank" class="demo-link">/wp-admin/</a></li>
-					<li><a href="/admin/" target="_blank" class="demo-link">/admin/</a></li>
-					<li><a href="/phpmyadmin/" target="_blank" class="demo-link">/phpmyadmin/</a></li>
-					<li><a href="/config.php" target="_blank" class="demo-link">/config.php</a></li>
-					<li><a href="/settings.php" target="_blank" class="demo-link">/settings.php</a></li>
+					<li><a href="/wp-config.php" class="demo-link">/wp-config.php</a></li>
+					<li><a href="/wp-admin/" class="demo-link">/wp-admin/</a></li>
+					<li><a href="/admin/" class="demo-link">/admin/</a></li>
+					<li><a href="/phpmyadmin/" class="demo-link">/phpmyadmin/</a></li>
+					<li><a href="/config.php" class="demo-link">/config.php</a></li>
+					<li><a href="/settings.php" class="demo-link">/settings.php</a></li>
 				</ul>
 			</div>
 
 			<div class="demo-group">
 				<h4>Backups & Archives</h4>
 				<ul class="demo-list">
-					<li><a href="/backup.sql" target="_blank" class="demo-link">/backup.sql</a></li>
-					<li><a href="/backup.zip" target="_blank" class="demo-link">/backup.zip</a></li>
-					<li><a href="/users.csv" target="_blank" class="demo-link">/users.csv</a></li>
-					<li><a href="/database.bak" target="_blank" class="demo-link">/database.bak</a></li>
-					<li><a href="/source.zip" target="_blank" class="demo-link">/source.zip</a></li>
-					<li><a href="/export.tar" target="_blank" class="demo-link">/export.tar</a></li>
+					<li><a href="/backup.sql" class="demo-link">/backup.sql</a></li>
+					<li><a href="/backup.zip" class="demo-link">/backup.zip</a></li>
+					<li><a href="/users.csv" class="demo-link">/users.csv</a></li>
+					<li><a href="/database.bak" class="demo-link">/database.bak</a></li>
+					<li><a href="/source.zip" class="demo-link">/source.zip</a></li>
+					<li><a href="/export.tar" class="demo-link">/export.tar</a></li>
 				</ul>
 			</div>
 
 			<div class="demo-group">
 				<h4>API Interfaces</h4>
 				<ul class="demo-list">
-					<li><a href="/swagger.json" target="_blank" class="demo-link">/swagger.json</a></li>
-					<li><a href="/openapi.json" target="_blank" class="demo-link">/openapi.json</a></li>
-					<li><a href="/graphql" target="_blank" class="demo-link">/graphql</a></li>
-					<li><a href="/api-docs/" target="_blank" class="demo-link">/api-docs/</a></li>
-					<li><a href="/api/v1/users" target="_blank" class="demo-link">/api/v1/users</a></li>
+					<li><a href="/swagger.json" class="demo-link">/swagger.json</a></li>
+					<li><a href="/openapi.json" class="demo-link">/openapi.json</a></li>
+					<li><a href="/graphql" class="demo-link">/graphql</a></li>
+					<li><a href="/api-docs/" class="demo-link">/api-docs/</a></li>
+					<li><a href="/api/v1/users" class="demo-link">/api/v1/users</a></li>
 				</ul>
 			</div>
 		</div>
 
 	</div>
+
+	<!-- Modal for Demo Content -->
+	<div id="demo-modal" class="modal">
+		<div class="modal-content">
+			<div class="terminal-header">
+				<span class="dot red" id="close-modal"></span><span class="dot yellow"></span><span class="dot green"></span>
+				<span class="title">Honeypot Response Preview</span>
+			</div>
+			<div class="modal-url-bar">
+				GET <span id="modal-url">/.env</span>
+			</div>
+			<iframe id="demo-iframe" src="" frameborder="0"></iframe>
+		</div>
+	</div>
+
+	<!-- Toasts Container -->
+	<div id="toast-container" class="toast-container"></div>
+
+	<script>
+		// --- 1. Copy Buttons for Code Blocks ---
+		document.querySelectorAll('pre').forEach(pre => {
+			const btn = document.createElement('button');
+			btn.className = 'copy-btn';
+			btn.textContent = 'Copy';
+			btn.onclick = () => {
+				const codeBlock = pre.querySelector('code');
+				const text = codeBlock ? codeBlock.innerText : pre.innerText;
+				navigator.clipboard.writeText(text);
+				btn.textContent = 'Copied!';
+				btn.style.borderColor = 'var(--accent)';
+				setTimeout(() => {
+					btn.textContent = 'Copy';
+					btn.style.borderColor = 'var(--border)';
+				}, 2000);
+			};
+			pre.appendChild(btn);
+		});
+
+		// --- 2. Toast Notification System ---
+		function showToast(message, isBanned = false) {
+			const container = document.getElementById('toast-container');
+			const toast = document.createElement('div');
+			toast.className = `toast ${isBanned ? 'banned' : ''}`;
+			
+			const icon = isBanned ? '🚨' : '🛡️';
+			toast.innerHTML = `<span class="toast-icon">${icon}</span> <span>${message}</span>`;
+			
+			container.appendChild(toast);
+			
+			// Remove element after animation
+			setTimeout(() => {
+				if(container.contains(toast)) {
+					container.removeChild(toast);
+				}
+			}, 4400);
+		}
+
+		// --- 3. Modal & Iframe Logic ---
+		const modal = document.getElementById('demo-modal');
+		const closeModalBtn = document.getElementById('close-modal');
+		const iframe = document.getElementById('demo-iframe');
+		const modalUrlText = document.getElementById('modal-url');
+
+		document.querySelectorAll('.demo-link').forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				const url = link.getAttribute('href');
+				
+				// Set iframe source and display URL
+				modalUrlText.textContent = url;
+				
+				// Show modal
+				modal.classList.add('show');
+				
+				// Optional: trigger toast
+				showToast(`Serving deceptive payload for <b>${url}</b>`);
+				
+				setTimeout(() => {
+					showToast(`IP logged and added to <b>honeypot_ips</b> WAF list!`, true);
+				}, 1500);
+
+				// Load iframe after slight delay to simulate processing
+				setTimeout(() => {
+					iframe.src = url;
+					
+					// Attempt to style plain text responses in iframe if they are just text
+					iframe.onload = function() {
+						try {
+							const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+							const body = iframeDoc.body;
+							// If it's pure text (like .env or .git/config), it's usually wrapped in a <pre> by the browser
+							if (body.children.length === 1 && body.children[0].tagName.toLowerCase() === 'pre') {
+								body.style.backgroundColor = '#1e1e1e';
+								body.style.color = '#d4d4d4';
+								body.children[0].style.fontFamily = "'JetBrains Mono', monospace";
+								body.children[0].style.fontSize = "14px";
+								body.children[0].style.padding = "20px";
+							}
+						} catch(e) {
+							// Ignore CORS or access errors
+						}
+					};
+				}, 300);
+			});
+		});
+
+		// Close Modal
+		const closeModal = () => {
+			modal.classList.remove('show');
+			setTimeout(() => { iframe.src = ''; }, 300); // Clear iframe after animation
+		};
+
+		closeModalBtn.addEventListener('click', closeModal);
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) closeModal();
+		});
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+		});
+
+		// --- 4. Animated Terminal Hero ---
+		const termLines = [
+			{ text: "[10:24:12] INFO: Honeypot Worker listening on edge...", type: "info" },
+			{ text: "[10:24:45] hacker GET /.env HTTP/1.1", type: "dim" },
+			{ text: "[10:24:45] ⚠️  Trigger matched: Environment file probe (/.env)", type: "err" },
+			{ text: "[10:24:45] 🛡️  Generating fake environment payload...", type: "info" },
+			{ text: "[10:24:45] 🚨 Triggering Cloudflare API...", type: "cmd" },
+			{ text: "[10:24:46] ✅ IP 192.0.2.143 successfully added to WAF blocklist!", type: "success" },
+			{ text: "[10:24:46] Payload served (243 bytes). Connection closed.", type: "dim" }
+		];
+
+		const termContainer = document.getElementById('anim-terminal');
+		let lineIndex = 0;
+
+		async function typeLine(lineObj) {
+			const lineDiv = document.createElement('div');
+			lineDiv.className = `term-line term-${lineObj.type}`;
+			
+			if (lineObj.type === 'cmd') {
+				const prompt = document.createElement('span');
+				prompt.className = 'term-prompt';
+				prompt.textContent = '$';
+				lineDiv.appendChild(prompt);
+			}
+
+			const textSpan = document.createElement('span');
+			lineDiv.appendChild(textSpan);
+			
+			const cursor = document.createElement('span');
+			cursor.className = 'cursor';
+			lineDiv.appendChild(cursor);
+			
+			termContainer.appendChild(lineDiv);
+
+			// Typing effect
+			for (let i = 0; i < lineObj.text.length; i++) {
+				textSpan.textContent += lineObj.text.charAt(i);
+				await new Promise(r => setTimeout(r, Math.random() * 30 + 10)); // Typing speed
+			}
+
+			cursor.remove(); // Remove cursor when done typing this line
+			return new Promise(r => setTimeout(r, 600)); // Pause after line
+		}
+
+		async function runTerminalAnimation() {
+			termContainer.innerHTML = ''; // clear
+			
+			for (const line of termLines) {
+				await typeLine(line);
+			}
+
+			// Add final blinking cursor
+			const finalLine = document.createElement('div');
+			finalLine.className = 'term-line';
+			finalLine.innerHTML = `<span class="term-prompt">$</span><span class="cursor"></span>`;
+			termContainer.appendChild(finalLine);
+
+			// Loop animation after a delay
+			setTimeout(runTerminalAnimation, 8000);
+		}
+
+		// Start animation
+		setTimeout(runTerminalAnimation, 1000);
+
+	</script>
 </body>
 
 </html>
