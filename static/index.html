@@ -12,12 +12,12 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link
-		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
 		rel="stylesheet">
 	<style>
 		:root {
 			--bg-base: #0f172a;
-			--bg-card: #1e293b;
+			--bg-card: rgba(30, 41, 59, 0.7);
 			--bg-code: #020617;
 			--border: #334155;
 			--text-main: #cbd5e1;
@@ -25,40 +25,111 @@
 			--text-heading: #f8fafc;
 			--accent: #38bdf8;
 			--accent-hover: #0ea5e9;
-			--border-radius: 8px;
+			--honey: #fbbf24;
+			--border-radius: 12px;
 		}
 
 		* { box-sizing: border-box; margin: 0; padding: 0; }
-		body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg-base); color: var(--text-main); line-height: 1.6; padding: 40px 20px; }
+		
+		body { 
+			font-family: 'Inter', -apple-system, sans-serif; 
+			background-color: var(--bg-base); 
+			color: var(--text-main); 
+			line-height: 1.6; 
+			padding: 40px 20px;
+			background-image: 
+				radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.1), transparent 40%),
+				linear-gradient(rgba(15, 23, 42, 0.93), rgba(15, 23, 42, 0.93)),
+				url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='%231e293b' stroke-width='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4v-4H4v4H0v2h4v4h2v-4h4v-2H6zM36 4v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+			background-attachment: fixed;
+		}
 
 		.header-container { display: flex; align-items: center; justify-content: space-between; gap: 40px; max-width: 1400px; margin: 0 auto 60px; }
-		@media (max-width: 960px) { .header-container { flex-direction: column; text-align: center; gap: 30px; } }
+		@media (max-width: 1024px) { .header-container { flex-direction: column; text-align: center; } }
 
 		.header-content { flex: 1; text-align: left; }
-		@media (max-width: 960px) { .header-content { text-align: center; } }
-		.header-content h1 { color: var(--text-heading); font-size: 2.8rem; font-weight: 700; letter-spacing: -0.025em; margin-bottom: 15px; display: flex; align-items: center; justify-content: flex-start; gap: 15px; }
-		@media (max-width: 960px) { .header-content h1 { justify-content: center; } }
-		.github-link { color: var(--text-muted); transition: color 0.2s ease; display: inline-flex; }
-		.github-link:hover { color: var(--accent); }
-		.header-content p { color: var(--text-muted); font-size: 1.2rem; margin-bottom: 25px; }
+		@media (max-width: 1024px) { .header-content { display: flex; flex-direction: column; align-items: center; } }
+		
+		/* Fixed Logo and Title Alignment with requested margin */
+		.logo-title-row { display: flex; align-items: center; gap: 20px; margin-bottom: 15px; margin-left: -77px; }
+		@media (max-width: 1024px) { .logo-title-row { justify-content: center; margin-left: 0; } }
+		
+		.main-logo { width: 56px; height: 56px; filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.4)); flex-shrink: 0; }
 
-		/* Badges */
-		.badges { display: flex; justify-content: flex-start; gap: 10px; flex-wrap: wrap; }
-		@media (max-width: 960px) { .badges { justify-content: center; } }
-		.badge { padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; background: var(--bg-card); border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
-		.badge-cf { color: #f6821f; border-color: rgba(246, 130, 31, 0.3); background: rgba(246, 130, 31, 0.05); }
-		.badge-license { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
-		.badge-version { color: var(--accent); border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05); }
+		.header-content h1 { color: var(--text-heading); font-size: 2.8rem; font-weight: 800; letter-spacing: -0.025em; display: flex; align-items: center; gap: 12px; margin: 0; }
+		
+		.header-content p { color: var(--text-muted); font-size: 1.2rem; margin-bottom: 25px; max-width: 600px; }
 
-		/* Animated Terminal */
-		.header-visual { flex: 1.2; width: 100%; min-width: 450px; }
-		@media (max-width: 960px) { .header-visual { min-width: 100%; } }
-		.hero-terminal { width: 100%; background: #000; border: 1px solid var(--border); border-radius: var(--border-radius); overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); text-align: left; margin: 0 auto; }
-		.terminal-header { background: #1e293b; padding: 8px 12px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
-		.dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+		.badges { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+		@media (max-width: 1024px) { .badges { justify-content: center; } }
+		.badge { padding: 5px 14px; border-radius: 30px; font-size: 0.85rem; font-weight: 600; background: rgba(30, 41, 59, 0.5); border: 1px solid var(--border); display: flex; align-items: center; gap: 8px; backdrop-filter: blur(4px); transition: all 0.2s ease; text-decoration: none !important; }
+		.badge-cf { color: #f6821f; border-color: rgba(246, 130, 31, 0.3); }
+		.badge-license { color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+		.badge-version { color: var(--accent); border-color: rgba(56, 189, 248, 0.3); }
+		.badge-github { color: var(--text-muted); border-color: var(--border); }
+		.badge-github:hover { color: var(--accent); border-color: var(--accent); background: rgba(56, 189, 248, 0.1); }
+
+		.header-visual { flex: 1.1; width: 100%; min-width: 450px; }
+		@media (max-width: 600px) { .header-visual { min-width: 100%; } }
+		
+		.hero-terminal { width: 100%; background: rgba(2, 6, 23, 0.95); border: 1px solid var(--border); border-radius: var(--border-radius); overflow: hidden; box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6); text-align: left; backdrop-filter: blur(10px); }
+		.terminal-header { background: #1e293b; padding: 10px 16px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+		.dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
 		.dot.red { background: #ff5f56; } .dot.yellow { background: #ffbd2e; } .dot.green { background: #27c93f; }
-		.terminal-header .title { margin-left: auto; margin-right: auto; color: #94a3b8; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
-		.terminal-body { padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #a3be8c; line-height: 1.6; height: 215px; overflow: hidden; position: relative; }
+		.terminal-header .title { margin-left: auto; margin-right: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #94a3b8; }
+		.terminal-body { padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #a3be8c; line-height: 1.7; height: 220px; overflow: hidden; }
+		
+		.layout-grid { display: grid; grid-template-columns: 1fr 1.6fr 350px; gap: 30px; max-width: 1550px; margin: 0 auto; align-items: start; }
+		@media (max-width: 1200px) { .layout-grid { grid-template-columns: 1fr 1.4fr; } .col-demo { grid-column: 1 / -1; } }
+		@media (max-width: 850px) { .layout-grid { grid-template-columns: 1fr; } }
+
+		.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--border-radius); padding: 30px; backdrop-filter: blur(8px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+		.card h2 { color: var(--text-heading); font-size: 1.3rem; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
+		.card h3 { color: var(--text-heading); font-size: 1.1rem; font-weight: 600; margin: 24px 0 12px; }
+		p { margin-bottom: 16px; }
+		a { color: var(--accent); text-decoration: none; transition: color 0.15s ease; }
+		a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+		code { font-family: 'JetBrains Mono', monospace; background: var(--bg-code); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #e2e8f0; }
+		pre { background: var(--bg-code); border: 1px solid var(--border); padding: 18px; border-radius: var(--border-radius); overflow-x: auto; margin-bottom: 20px; position: relative; }
+		pre code { background: transparent; border: none; padding: 0; color: #e2e8f0; font-size: 0.85em; }
+
+		.copy-btn { position: absolute; top: 10px; right: 10px; background: #1e293b; border: 1px solid var(--border); color: var(--text-muted); padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; opacity: 0; }
+		pre:hover .copy-btn { opacity: 1; }
+
+		.step { margin-bottom: 24px; position: relative; }
+		.step-title { display: flex; align-items: center; margin-bottom: 10px; color: var(--text-heading); font-weight: 600; }
+		.step-number { background: var(--accent); color: var(--bg-base); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.75rem; font-weight: 800; margin-right: 12px; flex-shrink: 0; }
+		.step p { padding-left: 34px; font-size: 0.95rem; }
+		.step pre { margin-left: 34px; }
+
+		.goal-highlight { background: rgba(56, 189, 248, 0.1); border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 var(--border-radius) var(--border-radius) 0; margin-bottom: 30px; }
+		ul { padding-left: 20px; margin-bottom: 20px; }
+		ul li { margin-bottom: 8px; }
+		.tech-stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+		.tech-tag { background: var(--bg-code); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
+
+		.demo-group { margin-bottom: 25px; }
+		.demo-link { display: flex; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-main); background: rgba(2, 6, 23, 0.4); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; transition: all 0.2s ease; cursor: pointer; text-decoration: none !important; margin-bottom: 8px; }
+		.demo-link:hover { background: var(--border); border-color: var(--accent); transform: translateX(6px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+		.demo-link::before { content: "GET"; font-size: 0.65rem; background: #22c55e; color: #000; padding: 2px 6px; border-radius: 4px; margin-right: 12px; font-weight: 800; }
+
+		/* Modal Styles */
+		.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); align-items: center; justify-content: center; }
+		.modal.show { display: flex; }
+		.modal-content { background: #000; border: 1px solid var(--border); border-radius: var(--border-radius); width: 90%; max-width: 900px; height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
+		.modal-url-bar { background: #0f172a; padding: 10px 20px; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 10px; }
+		.modal-url-bar span { color: var(--text-heading); }
+		#demo-iframe { width: 100%; height: 100%; border: none; background: #1e1e1e; }
+		#close-modal { cursor: pointer; position: relative; width: 12px; height: 12px; }
+
+		/* Toasts */
+		.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1001; display: flex; flex-direction: column; gap: 10px; }
+		.toast { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); color: var(--text-heading); padding: 16px 20px; border-radius: var(--border-radius); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 12px; font-size: 0.95rem; animation: slideIn 0.3s forwards, fadeOut 0.4s 4s forwards; backdrop-filter: blur(12px); }
+		.toast.banned { border-left-color: #ef4444; }
+		@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+		@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(120%); } }
+
 		.term-line { margin-bottom: 4px; }
 		.term-prompt { color: #81a1c1; margin-right: 8px; }
 		.term-cmd { color: #ebcb8b; }
@@ -67,92 +138,35 @@
 		.term-info { color: #88c0d0; }
 		.term-dim { color: #4c566a; }
 		.cursor { display: inline-block; width: 8px; height: 16px; background: #d8dee9; vertical-align: middle; animation: blink 1s step-end infinite; margin-left: 2px; }
-		@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-		.layout-grid { display: grid; grid-template-columns: 1fr 1.6fr 350px; gap: 40px; max-width: 1550px; margin: 0 auto; align-items: start; }
-		@media (max-width: 1100px) { .layout-grid { grid-template-columns: 1fr 1fr; } .col-demo { grid-column: 1 / -1; } }
-		@media (max-width: 768px) { .layout-grid { grid-template-columns: 1fr; } }
-
-		.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--border-radius); padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); }
-		.card h2 { color: var(--text-heading); font-size: 1.25rem; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-		.card h3 { color: var(--text-heading); font-size: 1.1rem; font-weight: 600; margin: 24px 0 12px; }
-		p { margin-bottom: 16px; }
-		a { color: var(--accent); text-decoration: none; transition: color 0.15s ease; }
-		a:hover { color: var(--accent-hover); text-decoration: underline; }
-
-		code { font-family: 'JetBrains Mono', monospace; background: var(--bg-code); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #e2e8f0; }
-		pre { background: var(--bg-code); border: 1px solid var(--border); padding: 16px; border-radius: var(--border-radius); overflow-x: auto; margin-bottom: 20px; position: relative; }
-		pre code { background: transparent; border: none; padding: 0; color: #e2e8f0; font-size: 0.85em; }
-
-		/* Copy button */
-		.copy-btn { position: absolute; top: 8px; right: 8px; background: #1e293b; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; opacity: 0; font-family: 'Inter', sans-serif; }
-		pre:hover .copy-btn { opacity: 1; }
-		.copy-btn:hover { background: var(--border); color: var(--text-heading); border-color: var(--accent); }
-
-		/* Left Column Specifics */
-		.step { margin-bottom: 24px; position: relative; }
-		.step-title { display: flex; align-items: center; margin-bottom: 10px; color: var(--text-heading); font-weight: 500; }
-		.step-number { background: var(--accent); color: var(--bg-base); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.75rem; font-weight: 700; margin-right: 12px; flex-shrink: 0; }
-		.step p { padding-left: 34px; margin-bottom: 10px; font-size: 0.95rem; color: var(--text-muted); }
-		.step pre { margin-left: 34px; }
-
-		/* Middle Column Specifics */
-		.goal-highlight { background: rgba(56, 189, 248, 0.1); border-left: 4px solid var(--accent); padding: 16px 20px; border-radius: 0 var(--border-radius) var(--border-radius) 0; margin-bottom: 30px; font-size: 1.05rem; }
-		ul { padding-left: 20px; margin-bottom: 20px; }
-		ul li { margin-bottom: 8px; }
-		.tech-stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
-		.tech-tag { background: var(--bg-code); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
-
-		/* Right Column Specifics */
-		.demo-group { margin-bottom: 25px; }
-		.demo-group:last-child { margin-bottom: 0; }
-		.demo-group h4 { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-		.demo-list { list-style: none; padding: 0; margin: 0; }
-		.demo-list li { margin-bottom: 6px; }
-		.demo-link { display: flex; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-main); background: var(--bg-code); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; transition: all 0.2s ease; cursor: pointer; text-decoration: none !important; }
-		.demo-link:hover { background: var(--border); color: var(--text-heading); border-color: var(--accent); transform: translateX(4px); }
-		.demo-link::before { content: "GET"; font-size: 0.65rem; background: #22c55e; color: #000; padding: 2px 6px; border-radius: 10px; margin-right: 10px; font-weight: 700; }
-
-		/* Modal Styles */
-		.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
-		.modal.show { display: flex; opacity: 1; }
-		.modal-content { background: #000; border: 1px solid var(--border); border-radius: var(--border-radius); width: 90%; max-width: 900px; height: 80vh; max-height: 700px; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transform: translateY(20px); transition: transform 0.3s ease; overflow: hidden; }
-		.modal.show .modal-content { transform: translateY(0); }
-		.modal .terminal-header { background: #1e293b; }
-		.modal-url-bar { background: #0f172a; padding: 8px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-muted); }
-		.modal-url-bar span { color: var(--text-heading); }
-		#demo-iframe { width: 100%; height: 100%; border: none; background: #1e1e1e; /* Darker background for iframe content */ }
-		#close-modal { cursor: pointer; position: relative; }
-		#close-modal:hover::after { content: '×'; position: absolute; top: -4px; left: 1px; color: #551a1a; font-size: 14px; font-weight: bold; line-height: 1; }
-
-		/* Toasts */
-		.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1001; display: flex; flex-direction: column; gap: 10px; }
-		.toast { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); color: var(--text-heading); padding: 16px 20px; border-radius: var(--border-radius); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 12px; font-size: 0.95rem; animation: slideIn 0.3s forwards, fadeOut 0.4s 4s forwards; }
-		.toast.banned { border-left-color: #ef4444; }
-		.toast-icon { font-size: 1.2rem; }
-		@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-		@keyframes fadeOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(120%); } }
 	</style>
 </head>
 
 <body>
 	<div class="header-container">
 		<div class="header-content">
-			<h1>
-				Cloudflare Honeypot
-				<a href="https://github.com/SecH0us3/honeypot" target="_blank" class="github-link" title="View on GitHub">
-					<svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-						<path
-							d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.44-1.305.806-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-					</svg>
-				</a>
-			</h1>
+			<div class="logo-title-row">
+				<svg class="main-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M50 5L15 20V45C15 67.3 30 87.9 50 95C70 87.9 85 67.3 85 45V20L50 5Z" fill="#38BDF8" fill-opacity="0.15" stroke="#38BDF8" stroke-width="3"/>
+					<path d="M50 30L63 37.5V52.5L50 60L37 52.5V37.5L50 30Z" fill="#FBBF24" fill-opacity="0.8"/>
+					<circle cx="50" cy="45" r="4" fill="#0F172A"/>
+					<path d="M50 60V75" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
+					<path d="M37 52.5L25 60" stroke="#FBBF24" stroke-width="2" stroke-dasharray="2 2"/>
+					<path d="M63 52.5L75 60" stroke="#FBBF24" stroke-width="2" stroke-dasharray="2 2"/>
+				</svg>
+				<h1>Cloudflare Honeypot</h1>
+			</div>
 			<p>Serverless Edge Security & Deception System</p>
 
 			<div class="badges">
 				<span class="badge badge-version">v1.1.0</span>
 				<span class="badge badge-cf">☁️ Cloudflare Workers</span>
 				<span class="badge badge-license">⚖️ MIT License</span>
+				<a href="https://github.com/SecH0us3/honeypot" target="_blank" class="badge badge-github" title="View on GitHub">
+					<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+						<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.44-1.305.806-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+					</svg>
+					GitHub
+				</a>
 			</div>
 		</div>
 
@@ -160,7 +174,9 @@
 			<div class="hero-terminal">
 				<div class="terminal-header">
 					<span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
-					<span class="title"><span style="color: #a3be8c; font-weight: bold;">edge-monitor</span><span style="color: #eceff4;">@</span><span style="color: #81a1c1; font-weight: bold;">honeypot</span><span style="color: #eceff4;">:</span><span style="color: #b48ead; font-weight: bold;">~</span></span>
+					<span class="title">
+						<span style="color: #a3be8c; font-weight: bold;">edge-monitor</span><span style="color: #eceff4;">@</span><span style="color: #81a1c1; font-weight: bold;">honeypot</span><span style="color: #eceff4;">:</span><span style="color: #b48ead; font-weight: bold;">~</span>
+					</span>
 				</div>
 				<div class="terminal-body" id="anim-terminal">
 					<!-- Animated content injected by JS -->
@@ -335,7 +351,7 @@ npm i</code></pre>
 
 	</div>
 
-	<!-- Modal for Demo Content -->
+	<!-- Modal Window HTML -->
 	<div id="demo-modal" class="modal">
 		<div class="modal-content">
 			<div class="terminal-header">
@@ -363,11 +379,7 @@ npm i</code></pre>
 				const text = codeBlock ? codeBlock.innerText : pre.innerText;
 				navigator.clipboard.writeText(text);
 				btn.textContent = 'Copied!';
-				btn.style.borderColor = 'var(--accent)';
-				setTimeout(() => {
-					btn.textContent = 'Copy';
-					btn.style.borderColor = 'var(--border)';
-				}, 2000);
+				setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
 			};
 			pre.appendChild(btn);
 		});
@@ -377,18 +389,10 @@ npm i</code></pre>
 			const container = document.getElementById('toast-container');
 			const toast = document.createElement('div');
 			toast.className = `toast ${isBanned ? 'banned' : ''}`;
-			
 			const icon = isBanned ? '🚨' : '🛡️';
-			toast.innerHTML = `<span class="toast-icon">${icon}</span> <span>${message}</span>`;
-			
+			toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
 			container.appendChild(toast);
-			
-			// Remove element after animation
-			setTimeout(() => {
-				if(container.contains(toast)) {
-					container.removeChild(toast);
-				}
-			}, 4400);
+			setTimeout(() => { if(container.contains(toast)) container.removeChild(toast); }, 4400);
 		}
 
 		// --- 3. Modal & Iframe Logic ---
@@ -401,30 +405,18 @@ npm i</code></pre>
 			link.addEventListener('click', (e) => {
 				e.preventDefault();
 				const url = link.getAttribute('href');
-				
-				// Set iframe source and display URL
 				modalUrlText.textContent = url;
-				
-				// Show modal
 				modal.classList.add('show');
 				
-				// Optional: trigger toast
 				showToast(`Serving deceptive payload for <b>${url}</b>`);
-				
-				setTimeout(() => {
-					showToast(`IP logged and added to <b>honeypot_ips</b> WAF list!`, true);
-				}, 1500);
+				setTimeout(() => { showToast(`IP logged and added to <b>honeypot_ips</b> list!`, true); }, 1500);
 
-				// Load iframe after slight delay to simulate processing
 				setTimeout(() => {
 					iframe.src = url;
-					
-					// Attempt to style plain text responses in iframe if they are just text
 					iframe.onload = function() {
 						try {
 							const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 							const body = iframeDoc.body;
-							// If it's pure text (like .env or .git/config), it's usually wrapped in a <pre> by the browser
 							if (body.children.length === 1 && body.children[0].tagName.toLowerCase() === 'pre') {
 								body.style.backgroundColor = '#1e1e1e';
 								body.style.color = '#d4d4d4';
@@ -432,27 +424,20 @@ npm i</code></pre>
 								body.children[0].style.fontSize = "14px";
 								body.children[0].style.padding = "20px";
 							}
-						} catch(e) {
-							// Ignore CORS or access errors
-						}
+						} catch(e) {}
 					};
 				}, 300);
 			});
 		});
 
-		// Close Modal
 		const closeModal = () => {
 			modal.classList.remove('show');
-			setTimeout(() => { iframe.src = ''; }, 300); // Clear iframe after animation
+			setTimeout(() => { iframe.src = ''; }, 300);
 		};
 
 		closeModalBtn.addEventListener('click', closeModal);
-		modal.addEventListener('click', (e) => {
-			if (e.target === modal) closeModal();
-		});
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
-		});
+		modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+		document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('show')) closeModal(); });
 
 		// --- 4. Animated Terminal Hero ---
 		const termLines = [
@@ -466,58 +451,39 @@ npm i</code></pre>
 		];
 
 		const termContainer = document.getElementById('anim-terminal');
-		let lineIndex = 0;
-
 		async function typeLine(lineObj) {
 			const lineDiv = document.createElement('div');
 			lineDiv.className = `term-line term-${lineObj.type}`;
-			
 			if (lineObj.type === 'cmd') {
 				const prompt = document.createElement('span');
 				prompt.className = 'term-prompt';
 				prompt.textContent = '$';
 				lineDiv.appendChild(prompt);
 			}
-
 			const textSpan = document.createElement('span');
 			lineDiv.appendChild(textSpan);
-			
 			const cursor = document.createElement('span');
 			cursor.className = 'cursor';
 			lineDiv.appendChild(cursor);
-			
 			termContainer.appendChild(lineDiv);
-
-			// Typing effect
 			for (let i = 0; i < lineObj.text.length; i++) {
 				textSpan.textContent += lineObj.text.charAt(i);
-				await new Promise(r => setTimeout(r, Math.random() * 30 + 10)); // Typing speed
+				await new Promise(r => setTimeout(r, Math.random() * 30 + 10));
 			}
-
-			cursor.remove(); // Remove cursor when done typing this line
-			return new Promise(r => setTimeout(r, 600)); // Pause after line
+			cursor.remove();
+			return new Promise(r => setTimeout(r, 600));
 		}
 
 		async function runTerminalAnimation() {
-			termContainer.innerHTML = ''; // clear
-			
-			for (const line of termLines) {
-				await typeLine(line);
-			}
-
-			// Add final blinking cursor
+			termContainer.innerHTML = '';
+			for (const line of termLines) { await typeLine(line); }
 			const finalLine = document.createElement('div');
 			finalLine.className = 'term-line';
 			finalLine.innerHTML = `<span class="term-prompt">$</span><span class="cursor"></span>`;
 			termContainer.appendChild(finalLine);
-
-			// Loop animation after a delay
 			setTimeout(runTerminalAnimation, 8000);
 		}
-
-		// Start animation
 		setTimeout(runTerminalAnimation, 1000);
-
 	</script>
 </body>
 
