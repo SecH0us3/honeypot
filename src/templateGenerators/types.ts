@@ -84,6 +84,7 @@ export abstract class BaseTemplateGenerator implements TemplateGenerator {
 		let content = template;
 
 		for (const [key, value] of Object.entries(this.variables)) {
+			// eslint-disable-next-line security/detect-non-literal-regexp -- keys are the generator's own variable names, not request data
 			const placeholder = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
 			content = content.replace(placeholder, String(value));
 		}

@@ -330,6 +330,7 @@ export function matchRule(url: string, userAgent: string): HoneypotRule | null {
 		}
 
 		// Regular pattern matching
+		// eslint-disable-next-line security/detect-non-literal-regexp -- patterns come from the static HONEYPOT_RULES list, not from the request
 		const regex = new RegExp(rule.pattern);
 		if (regex.test(url)) {
 			return rule;
