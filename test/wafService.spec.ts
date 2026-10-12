@@ -3,7 +3,7 @@ import { addIpToList, cleanupOldIps } from '../src/wafService';
 
 // Mock fetch
 const fetchMock = vi.fn();
-global.fetch = fetchMock;
+globalThis.fetch = fetchMock;
 
 describe('wafService', () => {
     const env = {
@@ -38,8 +38,8 @@ describe('wafService', () => {
                 json: async () => ({ success: false, errors: [{ message: 'Duplicate IP' }] }),
             });
 
-            // Should not throw
-            await addIpToList('1.2.3.4', 'Reason', env);
+            // Should not throw (a fresh IP: added IPs are cached per isolate)
+            await addIpToList('5.6.7.8', 'Reason', env);
             expect(fetchMock).toHaveBeenCalledTimes(1);
         });
     });

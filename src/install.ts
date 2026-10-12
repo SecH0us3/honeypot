@@ -12,17 +12,21 @@ export async function handleInstallRequest(request: Request, env: any): Promise<
     return new Response('Method not allowed', { status: 405 });
 }
 
-async function renderInstallPage(request: Request, env: any): Promise<Response> {
-    // Check if already configured
+// Once configured, the install endpoint is locked unless the request carries
+// the REINSTALL_KEY secret in the `reinstall` query parameter.
+async function isInstallLocked(request: Request, env: any): Promise<boolean> {
     const storedToken = await env.HONEYPOT_CONFIG.get('CF_API_TOKEN');
     const storedZoneId = await env.HONEYPOT_CONFIG.get('CF_ZONE_ID');
+    if (!storedToken || !storedZoneId) return false;
 
-    const url = new URL(request.url);
-    const reinstallKey = url.searchParams.get('reinstall');
+    const reinstallKey = new URL(request.url).searchParams.get('reinstall');
     const secretKey = env.REINSTALL_KEY;
-    const forceReinstall = secretKey && reinstallKey === secretKey;
+    const forceReinstall = Boolean(secretKey) && reinstallKey === secretKey;
+    return !forceReinstall;
+}
 
-    if (storedToken && storedZoneId && !forceReinstall) {
+async function renderInstallPage(request: Request, env: any): Promise<Response> {
+    if (await isInstallLocked(request, env)) {
         return new Response(`
             <!DOCTYPE html>
             <html>
@@ -113,6 +117,10 @@ async function renderInstallPage(request: Request, env: any): Promise<Response> 
 
 async function handleInstallSubmit(request: Request, env: any): Promise<Response> {
     try {
+        if (await isInstallLocked(request, env)) {
+            return new Response('Already configured', { status: 403 });
+        }
+
         const formData = await request.formData();
         const token = formData.get('token') as string;
         const zoneId = formData.get('zoneId') as string;
@@ -180,7 +188,8 @@ async function handleInstallSubmit(request: Request, env: any): Promise<Response
         `, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 
     } catch (error) {
-        return new Response(`Error: ${error}`, { status: 500 });
+        console.error('Install failed:', error);
+        return new Response('Installation failed', { status: 500 });
     }
 }
 
@@ -194,7 +203,6 @@ async function verifyAndGetAccount(token: string, zoneId: string): Promise<{ val
         });
 
         const data = await response.json() as any;
-        console.log('Data: ', data);
 
         if (data.success === true && data.result?.account?.id) {
             return { valid: true, accountId: data.result.account.id };

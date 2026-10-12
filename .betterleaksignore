@@ -1,0 +1,14 @@
+# Fake credentials that are part of the honeypot's documentation and manual test scripts.
+# Each line ignores one finding in one commit; anything new is still reported.
+# Reviewed: 2026-10-12
+
+# Sample fake .env output shown in the docs
+6e1517e970a6f4741f9217606be7887932411c44:EXAMPLES.md:generic-password:100
+6e1517e970a6f4741f9217606be7887932411c44:EXAMPLES.md:generic-password:104
+6e1517e970a6f4741f9217606be7887932411c44:EXAMPLES.md:generic-password:107
+e3768a44f55a4f841042b09661dee4129f4a6da0:DEMO_EXAMPLES.md:generic-password:64
+
+# Dummy login payloads sent to the honeypot by the manual test scripts
+6653ba0a87541cd8f39fb1c5219709f38bf92bf1:test_honeypot.js:generic-password:66
+6653ba0a87541cd8f39fb1c5219709f38bf92bf1:test_post.js:generic-password:20
+6653ba0a87541cd8f39fb1c5219709f38bf92bf1:test_post.js:generic-password:23
