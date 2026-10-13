@@ -13,6 +13,16 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Notification fields come from attacker requests, so escape them before rendering
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // Store recent notifications (in memory - use database for production)
 const notifications = [];
 const MAX_NOTIFICATIONS = 1000;
@@ -189,20 +199,20 @@ app.get('/dashboard', (req, res) => {
                     return `
                     <div class="${className}">
                         <div class="meta">
-                            ${notification.timestamp} |
-                            IP: ${data.clientIp || 'unknown'} |
-                            Country: ${data.country || 'unknown'} |
-                            Method: ${data.method || 'GET'}
-                            ${data.errorStatus ? ` | Status: ${data.errorStatus}` : ''}
+                            ${escapeHtml(notification.timestamp)} |
+                            IP: ${escapeHtml(data.clientIp || 'unknown')} |
+                            Country: ${escapeHtml(data.country || 'unknown')} |
+                            Method: ${escapeHtml(data.method || 'GET')}
+                            ${data.errorStatus ? ` | Status: ${escapeHtml(data.errorStatus)}` : ''}
                         </div>
                         <div>
-                            <strong>Path:</strong> <span class="path">${data.path || 'unknown'}</span>
+                            <strong>Path:</strong> <span class="path">${escapeHtml(data.path || 'unknown')}</span>
                             ${isHighPrio ? ' 🔥' : ''}
                             ${isPost ? ' 📮' : ''}
                         </div>
-                        <div><strong>Description:</strong> ${data.description || 'unknown'}</div>
-                        ${data.errorMessage ? `<div><strong>Error Message:</strong> ${data.errorMessage}</div>` : ''}
-                        <div><strong>User Agent:</strong> ${(data.userAgent || 'unknown').substring(0, 100)}${(data.userAgent || '').length > 100 ? '...' : ''}</div>
+                        <div><strong>Description:</strong> ${escapeHtml(data.description || 'unknown')}</div>
+                        ${data.errorMessage ? `<div><strong>Error Message:</strong> ${escapeHtml(data.errorMessage)}</div>` : ''}
+                        <div><strong>User Agent:</strong> ${escapeHtml(String(data.userAgent || 'unknown').substring(0, 100))}${String(data.userAgent || '').length > 100 ? '...' : ''}</div>
                     </div>
                     `;
                 }).join('')}
